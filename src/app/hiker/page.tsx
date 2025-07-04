@@ -233,11 +233,11 @@ export default function HikerPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {activeTab === "map" ? (
-          <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-200px)]">
+          <div className="flex flex-col lg:flex-row gap-6">
             {/* Map Section - Left on desktop, Top on mobile */}
             <div className="flex-1 lg:w-1/2">
-              <Card className="h-full border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
-                <CardHeader className="pb-4">
+              <Card className="p-6 h-full border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
+                <CardHeader className="">
                   <CardTitle className="flex items-center">
                     <MapPin className="h-5 w-5 mr-2 text-gray-600" />
                     Trail Map
@@ -246,7 +246,7 @@ export default function HikerPage() {
                     Interactive map showing trails and nearby shops
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="h-[420px] lg:h-[calc(100%-100px)]">
+                <CardContent className="h-[420px] lg:h-full">
                   {/* Real Mapbox Map */}
                   <MapboxMap 
                     accessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 'pk.demo_token'}
@@ -267,7 +267,7 @@ export default function HikerPage() {
 
             {/* Shops Section - Right on desktop, Bottom on mobile */}
             <div className="flex-1 lg:w-1/2">
-              <Card className="h-full border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
+              <Card className="p-6 h-full border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Store className="h-5 w-5 mr-2 text-gray-600" />
@@ -277,11 +277,11 @@ export default function HikerPage() {
                     Outdoor gear shops and services in your area
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="h-[calc(100%-100px)] overflow-y-auto">
+                <CardContent className="overflow-y-auto">
                   <div className="grid gap-4">
                     {mockShops.map((shop) => (
-                      <Card key={shop.id} className="border border-gray-200 dark:border-gray-700">
-                        <CardContent className="p-4">
+                      <Card key={shop.id} className="p-4 border border-gray-200 dark:border-gray-700">
+                        <CardContent className="">
                           <div className="flex items-start justify-between">
                             <div className="flex items-start space-x-3">
                               <div className="flex-1">
@@ -307,11 +307,11 @@ export default function HikerPage() {
                               </div>
                             </div>
                             <div className="flex flex-col lg:flex-row gap-2">
-                              <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+                              {/* <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
                                 <Phone className="h-4 w-4 mr-1" />
                                 Call
-                              </Button>
-                              <Button size="sm" className="bg-gray-900 hover:bg-gray-800 text-white">
+                              </Button> */}
+                              <Button size="sm" className="bg-gray-900 hover:bg-gray-800 text-white text-xs">
                                 <Navigation className="h-4 w-4 mr-1" />
                                 Directions
                               </Button>
