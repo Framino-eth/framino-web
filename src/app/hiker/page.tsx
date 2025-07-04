@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import dynamic from 'next/dynamic';
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,9 @@ import {
   Award, 
   Star, 
   Navigation,
-  Trophy
+  Trophy,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
 // Dynamically import MapboxMap to avoid SSR issues
@@ -93,89 +96,41 @@ const mockShops = [
 const mockBadges = [
   {
     id: 1,
-    name: "First Steps",
+    name: "Donate #1",
     description: "Completed your first hike",
-    rarity: "Common",
-    earned: true,
+    rarity: "100 / 100",
+    earned: false,
     icon: "🥾",
-    color: "bg-gray-600"
   },
   {
     id: 2,
-    name: "Peak Conqueror",
+    name: "Donate #2",
     description: "Reached 10 mountain summits",
-    rarity: "Rare",
+    rarity: "40 / 100",
     earned: true,
     icon: "⛰️",
-    color: "bg-gray-700"
-  },
-  {
-    id: 3,
-    name: "Trail Blazer",
-    description: "Discovered 5 new trails",
-    rarity: "Epic",
-    earned: true,
-    icon: "🧭",
-    color: "bg-gray-800"
-  },
-  {
-    id: 4,
-    name: "Early Bird",
-    description: "Started 20 hikes before sunrise",
-    rarity: "Rare",
-    earned: true,
-    icon: "🌅",
-    color: "bg-gray-700"
-  },
-  {
-    id: 5,
-    name: "Community Leader",
-    description: "Led 50 group hikes",
-    rarity: "Legendary",
-    earned: true,
-    icon: "👥",
-    color: "bg-gray-900"
-  },
-  {
-    id: 6,
-    name: "Weather Warrior",
-    description: "Hiked in all weather conditions",
-    rarity: "Epic",
-    earned: false,
-    icon: "⛈️",
-    color: "bg-gray-400"
-  },
-  {
-    id: 7,
-    name: "Distance Demon",
-    description: "Hiked 1000+ miles total",
-    rarity: "Legendary",
-    earned: false,
-    icon: "🏃‍♂️",
-    color: "bg-gray-400"
-  },
-  {
-    id: 8,
-    name: "Photo Pro",
-    description: "Shared 100 trail photos",
-    rarity: "Rare",
-    earned: true,
-    icon: "📸",
-    color: "bg-gray-700"
-  },
-  {
-    id: 9,
-    name: "Night Owl",
-    description: "Completed 10 night hikes",
-    rarity: "Epic",
-    earned: false,
-    icon: "🦉",
-    color: "bg-gray-400"
   }
 ];
 
 export default function HikerPage() {
   const [activeTab, setActiveTab] = useState<"map" | "badges">("map");
+  const [currentBadgeIndex, setCurrentBadgeIndex] = useState(0);
+
+  const nextBadge = () => {
+    setCurrentBadgeIndex((prev) => (prev + 1) % mockBadges.length);
+  };
+
+  const prevBadge = () => {
+    setCurrentBadgeIndex((prev) => (prev - 1 + mockBadges.length) % mockBadges.length);
+  };
+
+  const getScaleAndOpacity = (index: number) => {
+    const distance = Math.abs(index - currentBadgeIndex);
+    if (distance === 0) return { scale: 1, opacity: 1, zIndex: 10 };
+    if (distance === 1) return { scale: 0.8, opacity: 0.6, zIndex: 5 };
+    if (distance === 2) return { scale: 0.6, opacity: 0.3, zIndex: 2 };
+    return { scale: 0.4, opacity: 0.1, zIndex: 1 };
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -338,46 +293,116 @@ export default function HikerPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {mockBadges.map((badge) => (
-                    <Card 
-                      key={badge.id} 
-                      className={`border transition-all duration-200 hover:scale-105 ${
-                        badge.earned 
-                          ? "border-gray-300 dark:border-gray-600 shadow-sm" 
-                          : "border-gray-200 dark:border-gray-700 opacity-60"
-                      }`}
-                    >
-                      <CardContent className="p-6 text-center">
-                        <div className={`w-16 h-16 rounded-full ${badge.color} flex items-center justify-center mx-auto mb-4 text-2xl text-white`}>
-                          {badge.earned ? badge.icon : "🔒"}
-                        </div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                          {badge.name}
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                          {badge.description}
-                        </p>
-                        <div className="flex items-center justify-center space-x-2">
-                          <Badge 
-                            variant="secondary" 
-                            className={`${
-                              badge.rarity === "Legendary" ? "bg-gray-800 text-white" :
-                              badge.rarity === "Epic" ? "bg-gray-700 text-white" :
-                              badge.rarity === "Rare" ? "bg-gray-600 text-white" :
-                              "bg-gray-100 text-gray-800"
+                {/* Badge Carousel */}
+                <div className="relative">
+                  {/* Carousel Container */}
+                  <div className="relative h-80 flex items-center justify-center overflow-hidden">
+                    {mockBadges.map((badge, index) => {
+                      const { scale, opacity, zIndex } = getScaleAndOpacity(index);
+                      const isActive = index === currentBadgeIndex;
+                      const distance = index - currentBadgeIndex;
+                      const translateX = distance * 120; // Spread badges horizontally
+                      
+                      return (
+                        <motion.div
+                          key={badge.id}
+                          className="absolute cursor-pointer"
+                          style={{ zIndex }}
+                          animate={{
+                            scale,
+                            opacity,
+                            x: translateX,
+                          }}
+                          transition={{
+                            duration: 0.5,
+                            ease: "easeInOut"
+                          }}
+                          onClick={() => setCurrentBadgeIndex(index)}
+                        >
+                          <div 
+                            className={`w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center text-4xl text-white shadow-lg ${
+                              isActive ? "ring-4 ring-gray-300 dark:ring-gray-600" : ""
                             }`}
                           >
-                            {badge.rarity}
-                          </Badge>
-                          {badge.earned && (
-                            <Badge variant="outline" className="text-gray-600 border-gray-400">
-                              ✓ Earned
-                            </Badge>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
+                            {badge.earned ? badge.icon : "🔒"}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Navigation Buttons */}
+                  <div className="absolute top-1/2 -translate-y-1/2 left-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={prevBadge}
+                      className="h-10 w-10 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </Button>
+                  </div>
+                  <div className="absolute top-1/2 -translate-y-1/2 right-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={nextBadge}
+                      className="h-10 w-10 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Badge Information Area */}
+                <div className="mt-8 text-center">
+                  <motion.div
+                    key={currentBadgeIndex}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                      {mockBadges[currentBadgeIndex].name}
+                    </h3>
+                    {/* <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      {mockBadges[currentBadgeIndex].description}
+                    </p> */}
+                    <div className="flex items-center justify-center space-x-3">
+                      <Badge 
+                        variant="secondary" 
+                        className={`${
+                          "bg-gray-100 text-gray-800"
+                        } text-sm px-3 py-1`}
+                      >
+                        100 / 100
+                      </Badge>
+                      {mockBadges[currentBadgeIndex].earned && (
+                        <Badge variant="outline" className="text-green-600 border-green-400 text-sm px-3 py-1">
+                          ✓ Earned
+                        </Badge>
+                      )}
+                      {!mockBadges[currentBadgeIndex].earned && (
+                        <Badge variant="outline" className="text-gray-500 border-gray-400 text-sm px-3 py-1">
+                          🥾 In Progress
+                        </Badge>
+                      )}
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Progress Dots */}
+                <div className="flex justify-center space-x-2 mt-6">
+                  {mockBadges.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentBadgeIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                        index === currentBadgeIndex 
+                          ? "bg-gray-800 dark:bg-gray-300 w-8" 
+                          : "bg-gray-300 dark:bg-gray-600"
+                      }`}
+                    />
                   ))}
                 </div>
               </CardContent>
