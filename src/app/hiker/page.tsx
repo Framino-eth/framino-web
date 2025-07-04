@@ -12,7 +12,6 @@ import {
   Award, 
   Star, 
   Navigation,
-  Phone,
   Trophy
 } from "lucide-react";
 
