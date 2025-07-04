@@ -1,33 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Framino - Web3 Hiking Platform
 
-## Getting Started
+## 🚀 Features
 
-First, run the development server:
+- **Trail Discovery**: Explore curated, community-verified hiking trails
+- **Web3 Integration**: Connect your wallet and earn crypto rewards
+- **Achievement System**: Complete hiking challenges and earn tokens
+- **Community Features**: Connect with fellow hikers and share experiences
+- **Responsive Design**: Beautiful UI that works on all devices
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS + Shadcn/ui components
+- **Icons**: Lucide React
+- **Web3**: (Integration coming soon)
+
+## 📁 Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+├── components/
+│   └── ui/                # Shadcn/ui components
+└── lib/                   # Utility functions
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🎨 Design System
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Colors**: Nature-inspired greens, blues, and earth tones
+- **Components**: Consistent Shadcn/ui patterns
+- **Icons**: Lucide React icon set
+- **Typography**: Modern, readable fonts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Getting Started
 
-## Learn More
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Run the development server**:
+   ```bash
+   npm run dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Open your browser**:
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📋 Development Commands
+
+```bash
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Run linting
+npm run lint
+```
+
+## 🎯 Roadmap
+
+- [ ] Trail discovery page
+- [ ] User profile system  
+- [ ] Web3 wallet integration
+- [ ] Reward distribution system
+- [ ] Community features
+- [ ] Mobile app
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our contributing guidelines for more details.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Deploy on Vercel
 

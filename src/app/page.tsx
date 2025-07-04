@@ -1,102 +1,162 @@
-import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Mountain, MapPin, Wallet, Trophy, Users } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Navigation */}
+      <nav className="border-b bg-white/95 dark:bg-gray-900/95 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
+              <Mountain className="h-8 w-8 text-gray-700 dark:text-gray-300" />
+              <span className="text-xl font-bold text-gray-900 dark:text-white">Framino</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
+                <Wallet className="h-4 w-4 mr-2" />
+                Connect Wallet
+              </Button>
+              <Button size="sm" className="bg-gray-900 hover:bg-gray-800 text-white">
+                Get Started
+              </Button>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative overflow-hidden py-20 sm:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <Badge variant="secondary" className="mb-4 bg-gray-100 text-gray-700">
+              🚀 Web3 Hiking Platform
+            </Badge>
+            <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-gray-900 dark:text-white mb-6">
+              Discover Trails,{" "}
+              <span className="text-gray-700 dark:text-gray-300">
+                Earn Rewards
+              </span>
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+              Join the world&apos;s first Web3 hiking community. Explore verified trails, 
+              complete challenges, and earn crypto rewards for your outdoor adventures.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/hiker">
+                <Button size="lg" className="text-lg px-8 bg-gray-900 hover:bg-gray-800 text-white">
+                  <MapPin className="h-5 w-5 mr-2" />
+                  Explore Trails
+                </Button>
+              </Link>
+              <Button variant="outline" size="lg" className="text-lg px-8 border-gray-300 text-gray-700 hover:bg-gray-50">
+                Learn More
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-20 bg-white dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Why Choose Framino?
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300">
+              Combining the love of hiking with blockchain technology
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
+              <CardHeader>
+                <Trophy className="h-12 w-12 text-gray-600 mb-4" />
+                <CardTitle>Earn Rewards</CardTitle>
+                <CardDescription>
+                  Complete hiking challenges and earn crypto tokens for your achievements
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
+              <CardHeader>
+                <Users className="h-12 w-12 text-gray-600 mb-4" />
+                <CardTitle>Join Community</CardTitle>
+                <CardDescription>
+                  Connect with fellow hikers, share experiences, and discover new trails together
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
+              <CardHeader>
+                <MapPin className="h-12 w-12 text-gray-600 mb-4" />
+                <CardTitle>Verified Trails</CardTitle>
+                <CardDescription>
+                  Access curated, community-verified hiking trails with detailed information
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white">1,200+</div>
+              <div className="text-gray-600 dark:text-gray-300">Verified Trails</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white">5,000+</div>
+              <div className="text-gray-600 dark:text-gray-300">Active Hikers</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white">₿ 150+</div>
+              <div className="text-gray-600 dark:text-gray-300">Rewards Distributed</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white">25+</div>
+              <div className="text-gray-600 dark:text-gray-300">Countries</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gray-100 dark:bg-gray-800">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Ready to Start Your Web3 Hiking Journey?
+          </h2>
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+            Join thousands of hikers earning rewards for their outdoor adventures
+          </p>
+          <Button size="lg" className="text-lg px-8 bg-gray-900 hover:bg-gray-800 text-white">
+            <Wallet className="h-5 w-5 mr-2" />
+            Connect Wallet & Start
+          </Button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Mountain className="h-6 w-6" />
+              <span className="font-semibold">Framino</span>
+            </div>
+            <p className="text-gray-400">© 2025 Framino. All rights reserved.</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
