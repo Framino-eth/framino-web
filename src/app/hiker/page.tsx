@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Mountain, MapPin, Award, QrCode, Settings } from "lucide-react";
+import { Mountain, MapPin, Award, QrCode } from "lucide-react";
 import MapSection from "@/components/MapSection";
 import BadgeGallery from "@/components/BadgeGallery";
 import QRDonationScanner from "@/components/QRDonationScanner";
