@@ -26,7 +26,9 @@ import {
   Heart,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { WalletConnectButton } from "@/components/WalletConnectButton";
 import { CameraScanner } from "@/components/CameraScannerNew";
+import { RedeemButton } from "@/components/RedeemButton";
 
 // Mock shop items data
 const shopItems = [
@@ -152,7 +154,10 @@ export default function AdminPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [checkoutDrawerOpen, setCheckoutDrawerOpen] = useState(false);
   const [scannedBadgeId, setScannedBadgeId] = useState<string | null>(null);
-  const [checkoutStep, setCheckoutStep] = useState<"scan" | "confirm" | "complete">("scan");
+  const [checkoutStep, setCheckoutStep] = useState<
+    "scan" | "confirm" | "redeem" | "complete"
+  >("scan");
+  const [redemptionError, setRedemptionError] = useState<string | null>(null);
 
   const categories = [
     "All",
@@ -216,10 +221,11 @@ export default function AdminPage() {
 
   const handleCheckout = () => {
     if (cart.length === 0) return;
-    
+
     setCheckoutDrawerOpen(true);
     setCheckoutStep("scan");
     setScannedBadgeId(null);
+    setRedemptionError(null);
   };
 
   const handleScanSuccess = (badgeId: string) => {
@@ -228,20 +234,31 @@ export default function AdminPage() {
   };
 
   const handleConfirmCheckout = () => {
+    setCheckoutStep("redeem");
+  };
+
+  const handleRedeemSuccess = () => {
     setCheckoutStep("complete");
-    // In a real app, this would process the transaction
+    // Clear cart after successful redemption
     setTimeout(() => {
       setCheckoutDrawerOpen(false);
       setCart([]);
       setCheckoutStep("scan");
       setScannedBadgeId(null);
-    }, 2000);
+      setRedemptionError(null);
+    }, 3000);
+  };
+
+  const handleRedeemError = (error: string) => {
+    setRedemptionError(error);
+    // Optionally go back to confirm step or stay on redeem step
   };
 
   const handleCloseDrawer = () => {
     setCheckoutDrawerOpen(false);
     setCheckoutStep("scan");
     setScannedBadgeId(null);
+    setRedemptionError(null);
   };
 
   const clearCart = () => {
@@ -265,7 +282,8 @@ export default function AdminPage() {
                 </Badge>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <WalletConnectButton />
               <ThemeToggle />
             </div>
           </div>
@@ -396,7 +414,7 @@ export default function AdminPage() {
           )}
 
           <div className="flex items-center justify-between flex-col lg:flex-row gap-3">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
               <div className="flex items-center space-x-2">
                 <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -422,10 +440,10 @@ export default function AdminPage() {
               <Button
                 onClick={handleCheckout}
                 disabled={cart.length === 0}
-                className={` py-2 font-semibold cursor-pointer ${
+                className={`py-2 font-semibold cursor-pointer ${
                   cart.length === 0
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-green-600 hover:bg-green-700 text-white"
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500"
+                    : "bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900"
                 }`}
               >
                 Redeem for Hiker
@@ -442,12 +460,18 @@ export default function AdminPage() {
             <DrawerTitle>
               {checkoutStep === "scan" && "Scan Hiker Badge"}
               {checkoutStep === "confirm" && "Confirm Redemption"}
+              {checkoutStep === "redeem" && "Blockchain Redemption"}
               {checkoutStep === "complete" && "Redemption Complete"}
             </DrawerTitle>
             <DrawerDescription>
-              {checkoutStep === "scan" && "Scan the hiker's badge to verify their identity"}
-              {checkoutStep === "confirm" && "Review the items and confirm the redemption"}
-              {checkoutStep === "complete" && "Items have been successfully redeemed"}
+              {checkoutStep === "scan" &&
+                "Scan the hiker's badge to verify their identity"}
+              {checkoutStep === "confirm" &&
+                "Review the items and confirm the redemption"}
+              {checkoutStep === "redeem" &&
+                "Processing blockchain transaction for item redemption"}
+              {checkoutStep === "complete" &&
+                "Items have been successfully redeemed"}
             </DrawerDescription>
           </DrawerHeader>
 
@@ -478,7 +502,10 @@ export default function AdminPage() {
                     Redemption Summary
                   </h4>
                   {cart.map((item) => (
-                    <div key={item.id} className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                    <div
+                      key={item.id}
+                      className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700"
+                    >
                       <span className="text-sm text-gray-700 dark:text-gray-300">
                         {item.quantity}x {item.name}
                       </span>
@@ -508,11 +535,55 @@ export default function AdminPage() {
                   </Button>
                   <Button
                     onClick={handleConfirmCheckout}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    className="flex-1 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900"
                   >
-                    Confirm Redemption
+                    Proceed to Blockchain Redemption
                   </Button>
                 </div>
+              </div>
+            )}
+
+            {checkoutStep === "redeem" && scannedBadgeId && (
+              <div className="space-y-6">
+                {/* Badge Info */}
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <h4 className="font-medium text-green-800 dark:text-green-200">
+                    Hiker Badge Verified
+                  </h4>
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    Badge ID: {scannedBadgeId}
+                  </p>
+                </div>
+
+                {/* Redemption Error */}
+                {redemptionError && (
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <h4 className="font-medium text-red-800 dark:text-red-200 mb-2">
+                      Redemption Failed
+                    </h4>
+                    <p className="text-sm text-red-700 dark:text-red-300">
+                      {redemptionError}
+                    </p>
+                  </div>
+                )}
+
+                {/* Blockchain Redemption Component */}
+                <RedeemButton
+                  tokenId={scannedBadgeId}
+                  totalAmount={getTotalPrice()}
+                  cartItems={cart}
+                  onRedeemSuccess={handleRedeemSuccess}
+                  onRedeemError={handleRedeemError}
+                />
+
+                {/* Back Button */}
+                <Button
+                  variant="outline"
+                  onClick={() => setCheckoutStep("confirm")}
+                  className="w-full"
+                >
+                  Back to Confirmation
+                </Button>
               </div>
             )}
 

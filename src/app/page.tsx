@@ -22,7 +22,7 @@ export default function Home() {
                 Framino
               </span>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
               <Link href="/hiker">
                 <Button
                   size="sm"

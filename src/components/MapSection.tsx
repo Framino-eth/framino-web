@@ -156,7 +156,7 @@ export default function MapSection() {
                           <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                             {shop.address}
                           </p>
-                          <div className="flex items-center space-x-4 mt-2">
+                          <div className="flex items-center space-x-2 mt-2">
                             <div className="flex items-center">
                               <Star className="h-4 w-4 text-gray-600 mr-1 dark:text-gray-300" />
                               <span className="text-sm font-medium">
