@@ -33,7 +33,8 @@ export const config = getDefaultConfig({
   projectId: 'YOUR_PROJECT_ID', // You'll need to get this from WalletConnect Cloud
   chains: [
     mainnet,
-    ...(process.env.NODE_ENV === 'development' ? [sepolia, arbitrumSepolia] : []),
+    sepolia,
+    arbitrumSepolia
   ],
   ssr: true, // If your dApp uses server side rendering (SSR)
 });
