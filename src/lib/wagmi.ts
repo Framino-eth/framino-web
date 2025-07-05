@@ -1,10 +1,6 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import {
-  arbitrum,
-  base,
   mainnet,
-  optimism,
-  polygon,
   sepolia,
 } from 'wagmi/chains';
 import { defineChain } from 'viem';
@@ -37,10 +33,6 @@ export const config = getDefaultConfig({
   projectId: 'YOUR_PROJECT_ID', // You'll need to get this from WalletConnect Cloud
   chains: [
     mainnet,
-    polygon,
-    optimism,
-    arbitrum,
-    base,
     ...(process.env.NODE_ENV === 'development' ? [sepolia, arbitrumSepolia] : []),
   ],
   ssr: true, // If your dApp uses server side rendering (SSR)

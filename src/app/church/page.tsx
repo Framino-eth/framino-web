@@ -128,17 +128,17 @@ export default function ChurchPage() {
 
           {/* Action Button */}
           <div className="space-y-4">
-            {!isConnected && (
+            {/* {!isConnected && (
               <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                 <p className="text-sm text-yellow-700 dark:text-yellow-300">
                   Please connect your wallet to mark badges as completed
                 </p>
               </div>
-            )}
+            )} */}
             
             <Button
               onClick={handleOpenScanner}
-              disabled={!isConnected}
+            //   disabled={!isConnected}
               className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-md font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <QrCode className="h-6 w-6 mr-3" />
@@ -172,7 +172,6 @@ export default function ChurchPage() {
                 onScanSuccess={handleScanSuccess}
                 onClose={handleCloseDrawer}
                 isScanning={scannerDrawerOpen}
-                mode="church"
               />
             )}
 

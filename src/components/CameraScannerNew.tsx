@@ -90,10 +90,13 @@ export function CameraScanner({
     let intervalId: NodeJS.Timeout;
 
     if (isScanning && scanning) {
+      console.log(`🎥 Starting QR scanner in ${mode} mode...`);
+      
       intervalId = setInterval(() => {
         if (webcamRef.current) {
           const imageSrc = webcamRef.current.getScreenshot();
           if (imageSrc) {
+            console.log('📸 Taking screenshot for QR analysis...');
             try {
               const img = new Image();
               img.onload = async () => {
@@ -104,39 +107,57 @@ export function CameraScanner({
                     canvas.width = img.width;
                     canvas.height = img.height;
                     ctx.drawImage(img, 0, 0);
+                    console.log(`🖼️ Created canvas: ${canvas.width}x${canvas.height}`);
                     
                     // Convert canvas to blob and decode
                     canvas.toBlob(async (blob) => {
                       if (blob) {
                         try {
                           const url = URL.createObjectURL(blob);
+                          console.log('🔍 Attempting QR decode...');
                           const result = await codeReader.current.decodeFromVideo(url);
                           URL.revokeObjectURL(url);
                           if (result) {
                             const qrData = result.getText();
+                            console.log('✅ QR CODE FOUND!');
+                            console.log('📄 QR Data:', qrData);
+                            console.log('🎯 Mode:', mode);
+                            console.log('📊 Result object:', result);
+                            
                             setScanResult(qrData);
                             setScanning(false);
                             setError(null);
                             onScanSuccess(qrData);
                           }
-                        } catch {
-                          // Silent error - QR code not found in this frame
+                        } catch (decodeError) {
+                          // More detailed error logging for debugging
+                          if (decodeError instanceof Error) {
+                            console.log('❌ QR decode failed:', decodeError.message);
+                          } else {
+                            console.log('⚠️ No QR code found in this frame');
+                          }
                         }
                       }
                     }, 'image/jpeg');
                   }
-                } catch {
-                  // Silent error - QR code not found in this frame
+                } catch (canvasError) {
+                  console.error('🖼️ Canvas error:', canvasError);
                 }
               };
               img.src = imageSrc;
             } catch (err) {
-              console.error('Scanner error:', err);
+              console.error('📸 Scanner error:', err);
               setError('Camera scanning error');
             }
+          } else {
+            console.log('📷 No image source available from webcam');
           }
+        } else {
+          console.log('📹 Webcam ref not available');
         }
       }, 1000); // Scan every second
+    } else {
+      console.log('⏹️ Scanner stopped or not active');
     }
 
     return () => {
@@ -144,24 +165,33 @@ export function CameraScanner({
         clearInterval(intervalId);
       }
     };
-  }, [isScanning, scanning, onScanSuccess]);
+  }, [isScanning, scanning, onScanSuccess, mode]);
 
   const startScanning = () => {
+    console.log('🚀 START SCANNING BUTTON CLICKED');
+    console.log('🎯 Mode:', mode);
     setScanning(true);
     setError(null);
     setScanResult(null);
   };
 
   const stopScanning = () => {
+    console.log('🛑 STOP SCANNING BUTTON CLICKED');
     setScanning(false);
   };
 
   // Mock scan for demo purposes - uses mode-specific mock data
   const mockScan = () => {
+    console.log('🎭 DEMO SCAN TRIGGERED');
+    console.log('🎯 Mode:', mode);
+    console.log('📄 Mock data:', config.mockData);
+    
     setScanResult(config.mockData);
     setScanning(false);
     setError(null);
     onScanSuccess(config.mockData);
+    
+    console.log('✅ Demo scan completed successfully');
   };
 
   const getColorClasses = (color: string) => {
