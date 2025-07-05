@@ -119,10 +119,10 @@ export default function BadgeGallery() {
 
   return (
     <>
-      <Card className="border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
+      <Card className="border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-900">
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Trophy className="h-5 w-5 mr-2 text-gray-600" />
+            <Trophy className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-200" />
             Badge Gallery
           </CardTitle>
           <CardDescription>
@@ -157,7 +157,7 @@ export default function BadgeGallery() {
                     onClick={() => handleBadgeClick(index)}
                   >
                     <div
-                      className={`w-56 h-56 rounded-full bg-gray-100 flex items-center justify-center shadow-lg overflow-hidden transition-all ${
+                      className={`w-56 h-56 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center shadow-lg overflow-hidden transition-all ${
                         isActive
                           ? "ring-4 ring-gray-300 dark:ring-gray-600"
                           : ""

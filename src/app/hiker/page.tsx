@@ -51,10 +51,10 @@ export default function HikerPage() {
           <div className="flex space-x-4 pt-1">
             <button
               onClick={() => setActiveTab("map")}
-              className={`py-3 px-2 border-b-2 font-medium text-sm cursor-pointer ${
+              className={`py-3 px-2 border-b-2 font-medium text-sm cursor-pointer transition ${
                 activeTab === "map"
                   ? "border-gray-900 text-gray-900 dark:border-gray-300 dark:text-gray-100"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  : "border-transparent text-gray-500 hover:text-gray-400 hover:dark:text-gray-400 hover:border-gray-300"
               }`}
             >
               <MapPin className="h-4 w-4 inline mr-1" />
@@ -62,10 +62,10 @@ export default function HikerPage() {
             </button>
             <button
               onClick={() => setActiveTab("badges")}
-              className={`py-3 px-2 border-b-2 font-medium text-sm cursor-pointer ${
+              className={`py-3 px-2 border-b-2 font-medium text-sm cursor-pointer transition ${
                 activeTab === "badges"
                   ? "border-gray-900 text-gray-900 dark:border-gray-300 dark:text-gray-100"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  : "border-transparent text-gray-500 hover:text-gray-400 hover:dark:text-gray-400 hover:border-gray-300"
               }`}
             >
               <Award className="h-4 w-4 inline mr-1" />
@@ -73,10 +73,10 @@ export default function HikerPage() {
             </button>
             <button
               onClick={() => setActiveTab("donate")}
-              className={`py-3 px-2 border-b-2 font-medium text-sm cursor-pointer ${
+              className={`py-3 px-2 border-b-2 font-medium text-sm cursor-pointer transition ${
                 activeTab === "donate"
                   ? "border-gray-900 text-gray-900 dark:border-gray-300 dark:text-gray-100"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:dark:text-gray-400 hover:border-gray-300"
               }`}
             >
               <Heart className="h-4 w-4 inline mr-1" />

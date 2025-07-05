@@ -4,7 +4,8 @@ import dynamic from 'next/dynamic';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-  MapPin, 
+  MapPin,
+  Map,
   Store, 
   Star, 
   Navigation
@@ -91,10 +92,10 @@ export default function MapSection() {
     <div className="flex flex-col lg:flex-row gap-6">
       {/* Map Section - Left on desktop, Top on mobile */}
       <div className="flex-1 lg:w-1/2">
-        <Card className="p-6 h-full border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
+        <Card className="p-6 h-full border border-gray-200 shadow-sm bg-white dark:bg-gray-900 dark:border-gray-700">
           <CardHeader className="">
             <CardTitle className="flex items-center">
-              <MapPin className="h-5 w-5 mr-2 text-gray-600" />
+              <Map className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-200" />
               Trail Map
             </CardTitle>
             <CardDescription>
@@ -125,10 +126,10 @@ export default function MapSection() {
 
       {/* Shops Section - Right on desktop, Bottom on mobile */}
       <div className="flex-1 lg:w-1/2">
-        <Card className="p-6 h-full border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
+        <Card className="p-6 h-full border border-gray-200 shadow-sm bg-white dark:bg-gray-900 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Store className="h-5 w-5 mr-2 text-gray-600" />
+              <Store className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-200" />
               Shops Near You
             </CardTitle>
             <CardDescription>
@@ -157,13 +158,13 @@ export default function MapSection() {
                           </p>
                           <div className="flex items-center space-x-4 mt-2">
                             <div className="flex items-center">
-                              <Star className="h-4 w-4 text-gray-600 mr-1" />
+                              <Star className="h-4 w-4 text-gray-600 mr-1 dark:text-gray-300" />
                               <span className="text-sm font-medium">
                                 {shop.rating}
                               </span>
                             </div>
                             <div className="flex items-center">
-                              <MapPin className="h-4 w-4 text-gray-600 mr-1" />
+                              <MapPin className="h-4 w-4 text-gray-600 mr-1 dark:text-gray-300" />
                               <span className="text-sm">
                                 {shop.distance}
                               </span>
@@ -174,7 +175,7 @@ export default function MapSection() {
                       <div className="flex flex-col lg:flex-row gap-2">
                         <Button
                           size="sm"
-                          className="bg-gray-900 hover:bg-gray-800 text-white text-xs cursor-pointer"
+                          className="bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 text-white dark:text-gray-800 text-xs cursor-pointer"
                         >
                           <Navigation className="h-4 w-4 mr-1" />
                           Directions

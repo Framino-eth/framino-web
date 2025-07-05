@@ -66,7 +66,7 @@ export default function DonationForm() {
         </p>
       </div>
 
-      <Card className="border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
+      <Card className="border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-900">
         <CardContent className="space-y-6">
           {/* Amount Slider */}
           <div>
@@ -96,18 +96,18 @@ export default function DonationForm() {
                   max={maxAmount}
                   value={sliderValue}
                   onChange={handleSliderChange}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider dark:bg-gray-700"
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider dark:bg-gray-900"
                   style={{
                     background: `linear-gradient(to right, #10b981 0%, #10b981 ${
                       ((sliderValue - minAmount) / (maxAmount - minAmount)) *
                       100
-                    }%, #e5e7eb ${
+                    }%, #e5e7eb88 ${
                       ((sliderValue - minAmount) / (maxAmount - minAmount)) *
                       100
-                    }%, #e5e7eb 100%)`,
+                    }%, #e5e7eb88 100%)`,
                   }}
                 />
-                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-900 mt-1">
                   <span>${minAmount}</span>
                   <span>${maxAmount}</span>
                 </div>
