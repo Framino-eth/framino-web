@@ -17,14 +17,32 @@ export async function POST(req: NextRequest) {
     // Parse request body
     const body = await req.json();
     // Validate required fields
-    const requiredFields = ['account', 'id', 'value', 'uri'];
-    for (const field of requiredFields) {
-      if (!body[field]) {
-        return NextResponse.json(
-          { error: `Missing required field: ${field}` },
-          { status: 400 }
-        );
-      }
+    if (!body.account) {
+      return NextResponse.json(
+        { error: 'Missing required field: account' },
+        { status: 400 }
+      );
+    }
+    
+    if (body.id === undefined || body.id === null) {
+      return NextResponse.json(
+        { error: 'Missing required field: id' },
+        { status: 400 }
+      );
+    }
+    
+    if (body.value === undefined || body.value === null) {
+      return NextResponse.json(
+        { error: 'Missing required field: value' },
+        { status: 400 }
+      );
+    }
+    
+    if (!body.uri) {
+      return NextResponse.json(
+        { error: 'Missing required field: uri' },
+        { status: 400 }
+      );
     }
 
     const requestBody: NftMintRequest = body;

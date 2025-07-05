@@ -18,14 +18,25 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // Validate required fields
-    const requiredFields = ['user', 'id', 'newUri'];
-    for (const field of requiredFields) {
-      if (!body[field]) {
-        return NextResponse.json(
-          { error: `Missing required field: ${field}` },
-          { status: 400 }
-        );
-      }
+    if (!body.user) {
+      return NextResponse.json(
+        { error: 'Missing required field: user' },
+        { status: 400 }
+      );
+    }
+    
+    if (body.id === undefined || body.id === null) {
+      return NextResponse.json(
+        { error: 'Missing required field: id' },
+        { status: 400 }
+      );
+    }
+    
+    if (!body.newUri) {
+      return NextResponse.json(
+        { error: 'Missing required field: newUri' },
+        { status: 400 }
+      );
     }
 
     const requestBody: NftMarkCompletedRequest = body;

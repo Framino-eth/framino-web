@@ -14,8 +14,10 @@ import {
 import { Mountain, QrCode, CheckCircle } from "lucide-react";
 import { WalletConnectButton } from "@/components/WalletConnectButton";
 import { CameraScanner } from "@/components/CameraScannerNew";
+import { useAccount } from "wagmi";
 
 export default function ChurchPage() {
+  const { address, isConnected } = useAccount();
   const [scannerDrawerOpen, setScannerDrawerOpen] = useState(false);
   const [scannedBadgeId, setScannedBadgeId] = useState<string | null>(null);
   const [completionStatus, setCompletionStatus] = useState<"idle" | "processing" | "success" | "error">("idle");
@@ -32,16 +34,24 @@ export default function ChurchPage() {
     setScannedBadgeId(badgeId);
     setCompletionStatus("processing");
 
+    // Check if wallet is connected
+    if (!isConnected || !address) {
+      setErrorMessage("Please connect your wallet first");
+      setCompletionStatus("error");
+      return;
+    }
+
     try {
       // Call the mark-completed API endpoint
+      // TODO: scan NFT badge ID qrcode => both user address and badgeId
       const response = await fetch('/api/framino/mark-completed-with-paymaster', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user: '0x' + badgeId.padStart(40, '0'), // Convert badge ID to address format
-          id: parseInt(badgeId) % 8, // Use badge ID to determine badge ID (0-7)
+          user: address, // Use connected wallet address
+          id: 1, // Use badge ID to determine badge ID (0-7)
           newUri: `https://framino.com/nft/completed/${badgeId}`, // New URI for completed status
         }),
       });
@@ -117,13 +127,24 @@ export default function ChurchPage() {
           </div>
 
           {/* Action Button */}
-          <Button
-            onClick={handleOpenScanner}
-            className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-md font-semibold"
-          >
-            <QrCode className="h-6 w-6 mr-3" />
-            Scan Badge to Complete
-          </Button>
+          <div className="space-y-4">
+            {!isConnected && (
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  Please connect your wallet to mark badges as completed
+                </p>
+              </div>
+            )}
+            
+            <Button
+              onClick={handleOpenScanner}
+              disabled={!isConnected}
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-md font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <QrCode className="h-6 w-6 mr-3" />
+              {isConnected ? "Scan Badge to Complete" : "Connect Wallet First"}
+            </Button>
+          </div>
         </div>
       </div>
 

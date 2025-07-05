@@ -154,7 +154,7 @@ export function CameraScanner({
               <Camera className="h-4 w-4 mr-2" />
               Start Scanning
             </Button>
-            <Button onClick={mockScan} variant="outline" className="text-xs">
+            <Button onClick={mockScan} variant="outline" className="text-sm">
               Demo Scan
             </Button>
           </>
