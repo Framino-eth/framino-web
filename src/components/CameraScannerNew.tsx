@@ -13,7 +13,6 @@ interface CameraScannerProps {
 
 export function CameraScanner({
   onScanSuccess,
-  onClose,
   isScanning,
 }: CameraScannerProps) {
   const webcamRef = useRef<Webcam>(null);

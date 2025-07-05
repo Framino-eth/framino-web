@@ -7,16 +7,18 @@ import {
   MapPin,
   Award,
   Heart,
+  QrCode,
   Settings
 } from "lucide-react";
 import MapSection from "@/components/MapSection";
 import BadgeGallery from "@/components/BadgeGallery";
 import DonationForm from "@/components/DonationForm";
+import QRDonationScanner from "@/components/QRDonationScanner";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { WalletConnectButton } from "@/components/WalletConnectButton";
 
 export default function HikerPage() {
-  const [activeTab, setActiveTab] = useState<"map" | "badges" | "donate">("map");
+  const [activeTab, setActiveTab] = useState<"map" | "badges" | "donate" | "scan">("map");
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -82,6 +84,17 @@ export default function HikerPage() {
               <Heart className="h-4 w-4 inline mr-1" />
               Donate
             </button>
+            <button
+              onClick={() => setActiveTab("scan")}
+              className={`py-3 px-2 border-b-2 font-medium text-sm cursor-pointer transition ${
+                activeTab === "scan"
+                  ? "border-gray-900 text-gray-900 dark:border-gray-300 dark:text-gray-100"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:dark:text-gray-400 hover:border-gray-300"
+              }`}
+            >
+              <QrCode className="h-4 w-4 inline mr-1" />
+              Scan
+            </button>
           </div>
         </div>
       </div>
@@ -92,8 +105,10 @@ export default function HikerPage() {
           <MapSection />
         ) : activeTab === "badges" ? (
           <BadgeGallery />
-        ) : (
+        ) : activeTab === "donate" ? (
           <DonationForm />
+        ) : (
+          <QRDonationScanner />
         )}
       </div>
     </div>

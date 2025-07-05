@@ -278,19 +278,19 @@ export default function AdminPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Shop Items selection
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-lg text-balance text-gray-600 dark:text-gray-400 mb-6">
             Select items for hikers to redeem with their badges
           </p>
 
           {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-2 mb-6">
+          <div className="flex flex-wrap justify-center gap-2 mb-6 px-12 lg;p-2">
             {categories.map((category) => (
               <Button
                 key={category}
                 variant={selectedCategory === category ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(category)}
-                className={`${
+                className={`rounded-4xl! cursor-pointer ${
                   selectedCategory === category
                     ? "bg-green-600 hover:bg-green-700 text-white"
                     : "text-gray-600 border-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-800"
