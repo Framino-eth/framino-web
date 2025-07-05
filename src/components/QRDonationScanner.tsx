@@ -26,10 +26,10 @@ export default function QRDonationScanner() {
 
   // Slider settings
   const minAmount = 1;
-  const maxAmount = 100;
+  const maxAmount = 10;
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
+    const value = parseFloat(e.target.value);
     setSliderValue(value);
     setCustomAmount(value);
   };
@@ -224,6 +224,7 @@ export default function QRDonationScanner() {
                       min={minAmount}
                       max={maxAmount}
                       value={sliderValue}
+                      step={0.01}
                       onChange={handleSliderChange}
                       className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider dark:bg-gray-600"
                       style={{

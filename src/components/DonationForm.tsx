@@ -13,11 +13,11 @@ export default function DonationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Slider settings
-  const minAmount = 1;
-  const maxAmount = 100;
+  const minAmount = 0.1;
+  const maxAmount = 5;
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
+    const value = parseFloat(e.target.value);
     setSliderValue(value);
     setDonationAmount(value);
   };
