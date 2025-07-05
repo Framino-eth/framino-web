@@ -8,6 +8,7 @@ import {
 import { Mountain, MapPin, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 import bgImage from "@/assets/bg.png";
+import ApiTest from "@/components/ApiTest";
 
 export default function Home() {
   return (
@@ -110,6 +111,21 @@ export default function Home() {
               </CardHeader>
             </Card>
           </div>
+        </div>
+      </section>
+
+      {/* API Test Section */}
+      <section className="py-16 bg-[#f2eee7] dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Try Our API
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300">
+              Test our backend infrastructure in real-time
+            </p>
+          </div>
+          <ApiTest />
         </div>
       </section>
 
