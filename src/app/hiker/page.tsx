@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,16 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
+
+// Import seasonal badge images
+import springComplete from "@/assets/spring-complete.png";
+import spring from "@/assets/spring.png";
+import summerComplete from "@/assets/summer-complete.png";
+import summer from "@/assets/summer.png";
+import autumnComplete from "@/assets/autumn-complete.png";
+import autumn from "@/assets/autumn.png";
+import winterComplete from "@/assets/winter-complete.png";
+import winter from "@/assets/winter.png";
 
 // Dynamically import MapboxMap to avoid SSR issues
 const MapboxMap = dynamic(() => import('@/components/MapboxMap'), {
@@ -96,19 +107,39 @@ const mockShops = [
 const mockBadges = [
   {
     id: 1,
-    name: "Donate #1",
-    description: "Completed your first hike",
-    rarity: "100 / 100",
-    earned: false,
-    icon: "🥾",
+    name: "Spring Awakening",
+    description: "Complete hiking challenges during spring season",
+    rarity: "25 / 100",
+    earned: true,
+    imageComplete: springComplete,
+    imageIncomplete: spring,
   },
   {
     id: 2,
-    name: "Donate #2",
-    description: "Reached 10 mountain summits",
-    rarity: "40 / 100",
+    name: "Summer Explorer",
+    description: "Conquer trails under the summer sun",
+    rarity: "40 / 100", 
+    earned: false,
+    imageComplete: summerComplete,
+    imageIncomplete: summer,
+  },
+  {
+    id: 3,
+    name: "Autumn Wanderer",
+    description: "Discover the beauty of fall hiking",
+    rarity: "60 / 100",
     earned: true,
-    icon: "⛰️",
+    imageComplete: autumnComplete,
+    imageIncomplete: autumn,
+  },
+  {
+    id: 4,
+    name: "Winter Warrior",
+    description: "Brave the cold on winter expeditions", 
+    rarity: "15 / 100",
+    earned: false,
+    imageComplete: winterComplete,
+    imageIncomplete: winter,
   }
 ];
 
@@ -127,7 +158,7 @@ export default function HikerPage() {
   const getScaleAndOpacity = (index: number) => {
     const distance = Math.abs(index - currentBadgeIndex);
     if (distance === 0) return { scale: 1, opacity: 1, zIndex: 10 };
-    if (distance === 1) return { scale: 0.8, opacity: 0.6, zIndex: 5 };
+    if (distance === 1) return { scale: 0.7, opacity: 0.6, zIndex: 5 };
     if (distance === 2) return { scale: 0.6, opacity: 0.3, zIndex: 2 };
     return { scale: 0.4, opacity: 0.1, zIndex: 1 };
   };
@@ -301,7 +332,7 @@ export default function HikerPage() {
                       const { scale, opacity, zIndex } = getScaleAndOpacity(index);
                       const isActive = index === currentBadgeIndex;
                       const distance = index - currentBadgeIndex;
-                      const translateX = distance * 120; // Spread badges horizontally
+                      const translateX = distance * 240; // Spread badges horizontally
                       
                       return (
                         <motion.div
@@ -320,11 +351,19 @@ export default function HikerPage() {
                           onClick={() => setCurrentBadgeIndex(index)}
                         >
                           <div 
-                            className={`w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center text-4xl text-white shadow-lg ${
+                            className={`w-56 h-56 rounded-full bg-gray-100 flex items-center justify-center shadow-lg overflow-hidden transition-all ${
                               isActive ? "ring-4 ring-gray-300 dark:ring-gray-600" : ""
                             }`}
                           >
-                            {badge.earned ? badge.icon : "🔒"}
+                            <Image 
+                              src={badge.earned ? badge.imageComplete : badge.imageIncomplete}
+                              alt={badge.name}
+                              width={144}
+                              height={144}
+                              className={`object-cover transition-all duration-300 ${
+                                badge.earned ? "" : "grayscale-50 opacity-50"
+                              }`}
+                            />
                           </div>
                         </motion.div>
                       );
@@ -358,24 +397,23 @@ export default function HikerPage() {
                 <div className="mt-8 text-center">
                   <motion.div
                     key={currentBadgeIndex}
-                    initial={{ opacity: 0, y: 6 }}
+                    initial={{ opacity: 0.25, y: 0 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
+                    exit={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, ease: "easeInOut" }}
                   >
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                       {mockBadges[currentBadgeIndex].name}
                     </h3>
-                    {/* <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
                       {mockBadges[currentBadgeIndex].description}
-                    </p> */}
+                    </p>
                     <div className="flex items-center justify-center space-x-3">
                       <Badge 
                         variant="secondary" 
-                        className={`${
-                          "bg-gray-100 text-gray-800"
-                        } text-sm px-3 py-1`}
+                        className="bg-gray-100 text-gray-800 text-sm px-3 py-1"
                       >
-                        100 / 100
+                        {mockBadges[currentBadgeIndex].rarity}
                       </Badge>
                       {mockBadges[currentBadgeIndex].earned && (
                         <Badge variant="outline" className="text-green-600 border-green-400 text-sm px-3 py-1">
