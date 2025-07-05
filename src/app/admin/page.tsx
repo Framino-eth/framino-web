@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -271,7 +272,7 @@ export default function AdminPage() {
       <nav className="border-b bg-white/95 dark:bg-gray-900/95 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
               <Mountain className="h-8 w-8 text-gray-700 dark:text-gray-300" />
               <div>
                 <span className="text-xl font-bold text-gray-900 dark:text-white">
@@ -281,7 +282,7 @@ export default function AdminPage() {
                   Shop Admin
                 </Badge>
               </div>
-            </div>
+            </Link>
             <div className="flex items-center space-x-2">
               <WalletConnectButton />
               <ThemeToggle />
