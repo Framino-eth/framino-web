@@ -482,6 +482,7 @@ export default function AdminPage() {
                 onScanSuccess={handleScanSuccess}
                 onClose={handleCloseDrawer}
                 isScanning={checkoutDrawerOpen}
+                mode="shop"
               />
             )}
 

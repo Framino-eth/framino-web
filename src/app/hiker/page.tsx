@@ -2,22 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { 
-  Mountain,
-  MapPin,
-  Award,
-  QrCode,
-  Settings
-} from "lucide-react";
+import { Mountain, MapPin, Award, QrCode, Settings } from "lucide-react";
 import MapSection from "@/components/MapSection";
 import BadgeGallery from "@/components/BadgeGallery";
-import DonationForm from "@/components/DonationForm";
 import QRDonationScanner from "@/components/QRDonationScanner";
 // import { ThemeToggle } from "@/components/ThemeToggle";
 import { WalletConnectButton } from "@/components/WalletConnectButton";
 
 export default function HikerPage() {
-  const [activeTab, setActiveTab] = useState<"map" | "badges" | "donate" | "scan">("map");
+  const [activeTab, setActiveTab] = useState<
+    "map" | "badges" | "donate" | "scan"
+  >("map");
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -25,14 +20,17 @@ export default function HikerPage() {
       <nav className="border-b bg-white/95 dark:bg-gray-900/95 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+            <Link
+              href="/"
+              className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+            >
               <Mountain className="h-8 w-8 text-gray-700 dark:text-gray-300" />
               <span className="text-xl font-bold text-gray-900 dark:text-white">
                 Framino
               </span>
             </Link>
             <div className="flex items-center space-x-2">
-              <Link 
+              <Link
                 href="/admin"
                 className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 flex items-center space-x-1 transition-colors"
               >
@@ -104,8 +102,6 @@ export default function HikerPage() {
           <MapSection />
         ) : activeTab === "badges" ? (
           <BadgeGallery />
-        ) : activeTab === "donate" ? (
-          <DonationForm />
         ) : (
           <QRDonationScanner />
         )}

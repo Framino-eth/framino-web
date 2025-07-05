@@ -25,8 +25,8 @@ export default function QRDonationScanner() {
   const [sliderValue, setSliderValue] = useState<number>(5);
   const { address } = useAccount();
   // Slider settings
-  const minAmount = 0.01;
-  const maxAmount = 10;
+  const minAmount = 1;
+  const maxAmount = 5;
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
@@ -99,7 +99,7 @@ export default function QRDonationScanner() {
         },
         body: JSON.stringify({
           id: 1,
-          value: 1,
+          value: customAmount ,
           account: address,
           uri: "https://bafybeihdkfn4ozw326n5fc543qvg5ttjbn6a3ru2xguoyndxhysrwh55oi.ipfs.dweb.link/", // Replace with actual NFT metadata URI
         }),
@@ -177,6 +177,7 @@ export default function QRDonationScanner() {
               onScanSuccess={handleScanSuccess}
               onClose={handleStopScanning}
               isScanning={isScanning}
+              mode="hiker"
             />
           </CardContent>
         </Card>
@@ -242,7 +243,7 @@ export default function QRDonationScanner() {
                       min={minAmount}
                       max={maxAmount}
                       value={sliderValue}
-                      step={0.01}
+                      step={1}
                       onChange={handleSliderChange}
                       className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider dark:bg-gray-600"
                       style={{

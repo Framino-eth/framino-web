@@ -12,12 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Trophy,
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
-} from "lucide-react";
+import { Trophy, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { useAccount } from "wagmi";
 import { useMintBadge } from "@/hooks/useMintBadge";
 import { readContracts } from "@wagmi/core";
@@ -25,40 +20,74 @@ import { config } from "@/lib/wagmi";
 import FraminoNFTABI from "@/lib/abi/FraminoNFT.json";
 import { Abi } from "viem";
 import { StaticImageData } from "next/image";
+import { QRCodeSVG } from "qrcode.react";
 
 // Import seasonal badge images
-// import springComplete from "@/assets/spring-complete.png";
-// import spring from "@/assets/spring.png";
-// import summerComplete from "@/assets/summer-complete.png";
-// import summer from "@/assets/summer.png";
-// import autumnComplete from "@/assets/autumn-complete.png";
-// import autumn from "@/assets/autumn.png";
-// import winterComplete from "@/assets/winter-complete.png";
-// import winter from "@/assets/winter.png";
+import springComplete from "@/assets/spring-complete.png";
+import spring from "@/assets/spring.png";
+import summerComplete from "@/assets/summer-complete.png";
+import summer from "@/assets/summer.png";
+import autumnComplete from "@/assets/autumn-complete.png";
+import autumn from "@/assets/autumn.png";
+import winterComplete from "@/assets/winter-complete.png";
+import winter from "@/assets/winter.png";
 
-// Mock data for badges/NFTs
-const mockBadges: EnhancedBadge[] = [];
-console.log(mockBadges);
+// Image mapping function
+const getBadgeImages = (badgeId: number, isCompleted?: boolean) => {
+  console.log(isCompleted);
+  const imageMap = {
+    0: { complete: springComplete, incomplete: spring, name: "Spring Hiker" },
+    1: {
+      complete: summerComplete,
+      incomplete: summer,
+      name: "Summer Explorer",
+    },
+    2: {
+      complete: autumnComplete,
+      incomplete: autumn,
+      name: "Autumn Wanderer",
+    },
+    3: {
+      complete: winterComplete,
+      incomplete: winter,
+      name: "Winter Adventurer",
+    },
+  };
+
+  const defaultImages = {
+    complete: springComplete, // Default fallback
+    incomplete: spring,
+    name: `Badge ${badgeId}`,
+  };
+
+  const images = imageMap[badgeId as keyof typeof imageMap] || defaultImages;
+
+  return {
+    imageComplete: images.complete,
+    imageIncomplete: images.incomplete,
+    name: images.name,
+  };
+};
 
 interface EnhancedBadge {
   id: number;
   name: string;
   description: string;
-  rarity: string;
   earned: boolean;
-  imageComplete: StaticImageData;
-  imageIncomplete: StaticImageData;
+  imageComplete?: StaticImageData;
+  imageIncomplete?: StaticImageData;
   balance?: number;
   isCompleted?: boolean;
   uri?: string;
   customUri?: string;
+  value?: number;
 }
 
 export default function BadgeGallery() {
   const [currentBadgeIndex, setCurrentBadgeIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [badges, setBadges] = useState<EnhancedBadge[]>(mockBadges);
+  const [badges, setBadges] = useState<EnhancedBadge[]>([]);
   const [lastFetchedAddress, setLastFetchedAddress] = useState<string | null>(
     null
   );
@@ -92,6 +121,7 @@ export default function BadgeGallery() {
         const balances = await readContracts(config, {
           contracts: balanceCalls,
         });
+        console.log({ balances });
 
         // Find which tokens the user owns
         const ownedTokenIds: number[] = [];
@@ -105,7 +135,12 @@ export default function BadgeGallery() {
         // If user owns badges, fetch details for those badges only
         const badgeDetails: Record<
           number,
-          { isCompleted: boolean; uri: string; customUri?: string; value?: number }
+          {
+            isCompleted: boolean;
+            uri: string;
+            customUri?: string;
+            // value?: number;
+          }
         > = {};
 
         if (ownedTokenIds.length > 0) {
@@ -152,40 +187,40 @@ export default function BadgeGallery() {
           });
         }
 
-        // Update badges with ownership and detail data
-        const updatedBadges = mockBadges.map((badge) => {
-          const isOwned = ownedTokenIds.includes(badge.id);
-          const details = badgeDetails[badge.id];
+        // Create badges dynamically based on NFT data instead of mock data
+        const allBadgeIds = [0, 1, 2, 3, 4, 5, 6, 7];
+        const updatedBadges = allBadgeIds
+          .map((badgeId) => {
+            const isOwned = ownedTokenIds.includes(badgeId);
+            const details = badgeDetails[badgeId];
+            const isCompleted = details?.isCompleted || false;
 
-          return {
-            ...badge,
-            earned: isOwned,
-            balance: isOwned ? 1 : 0,
-            isCompleted: details?.isCompleted || false,
-            uri: details?.uri || "",
-            customUri: details?.customUri,
-          };
-        });
+            // Get seasonal images for this badge
+            const { imageComplete, imageIncomplete, name } = getBadgeImages(
+              badgeId,
+              isCompleted
+            );
+
+            return {
+              id: badgeId,
+              name: name,
+              description: `NFT Badge #${badgeId} - ${name}`,
+              earned: isOwned,
+              imageComplete: imageComplete,
+              imageIncomplete: imageIncomplete,
+              balance: (balances[badgeId].result as number) || 0,
+              isCompleted: isCompleted,
+              uri: details?.uri || "",
+              customUri: details?.customUri,
+            };
+          })
+          .filter((badge) => badge.earned);
 
         setBadges(updatedBadges);
         setLastFetchedAddress(walletAddress);
 
         // Enhanced console log with details
-        console.log("=== USER NFT DATA ===");
-        console.log("Total NFTs owned:", ownedTokenIds.length);
-        console.log("Owned token IDs:", ownedTokenIds);
-        if (ownedTokenIds.length > 0) {
-          console.log("Badge Details:");
-          ownedTokenIds.forEach((tokenId) => {
-            const badge = updatedBadges.find((b) => b.id === tokenId);
-            console.log(`- Badge ${tokenId} (${badge?.name}):`, {
-              completed: badgeDetails[tokenId]?.isCompleted,
-              uri: badgeDetails[tokenId]?.uri,
-              customUri: badgeDetails[tokenId]?.customUri,
-            });
-          });
-        }
-        console.log("===================");
+        console.log("Owned badges:", ownedTokenIds, updatedBadges);
       } catch (err) {
         console.error("Error fetching NFT data:", err);
       } finally {
@@ -213,7 +248,7 @@ export default function BadgeGallery() {
 
     // Reset data when wallet disconnects
     if (!isConnected && lastFetchedAddress) {
-      setBadges(mockBadges);
+      setBadges([]);
       setLastFetchedAddress(null);
     }
   }, [isConnected, address, lastFetchedAddress, fetchUserNFTs, isLoading]);
@@ -281,7 +316,7 @@ export default function BadgeGallery() {
           )}
 
           {/* Badge Carousel */}
-          {!isLoading && (
+          {!isLoading && badges.length > 0 && (
             <div>
               <div className="relative">
                 {/* Carousel Container */}
@@ -316,19 +351,27 @@ export default function BadgeGallery() {
                               : ""
                           }`}
                         >
-                          <Image
-                            src={
-                              badge.earned
-                                ? badge.imageComplete
-                                : badge.imageIncomplete
-                            }
-                            alt={badge.name}
-                            width={144}
-                            height={144}
-                            className={`object-cover transition-all duration-300 ${
-                              badge.earned ? "" : "grayscale-50 opacity-50"
-                            }`}
-                          />
+                          {badge.imageComplete && badge.imageIncomplete ? (
+                            <Image
+                              src={
+                                badge.isCompleted
+                                  ? badge.imageComplete
+                                  : badge.imageIncomplete
+                              }
+                              alt={badge.name}
+                              width={144}
+                              height={144}
+                              className={`object-cover transition-all duration-300 ${
+                                badge.isCompleted ? "" : "opacity-75"
+                              }`}
+                            />
+                          ) : (
+                            <div className="w-36 h-36 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                              <span className="text-white font-bold text-lg">
+                                {badge.id}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     );
@@ -370,19 +413,13 @@ export default function BadgeGallery() {
                     {badges[currentBadgeIndex]?.name}
                   </h3>
                   <div className="flex items-center justify-center space-x-3">
-                    <Badge
-                      variant="secondary"
-                      className="bg-gray-100 text-gray-800 text-sm px-3 py-1"
-                    >
-                      {badges[currentBadgeIndex]?.rarity}
-                    </Badge>
                     {badges[currentBadgeIndex]?.earned &&
                     badges[currentBadgeIndex]?.isCompleted ? (
                       <Badge
                         variant="outline"
-                        className="text-blue-600 border-blue-400 text-sm px-3 py-1"
+                        className="text-green-600 border-green-400 text-sm px-3 py-1"
                       >
-                        🏆 Completed
+                        ✅ Completed
                       </Badge>
                     ) : (
                       <Badge
@@ -411,11 +448,25 @@ export default function BadgeGallery() {
               </div>
             </div>
           )}
+
+          {/* No badges message */}
+          {!isLoading && badges.length === 0 && (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trophy className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-gray-600 dark:text-gray-400">
+                {isConnected
+                  ? "No badges found. Start hiking to earn your first badge!"
+                  : "Connect your wallet to view your badges"}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Badge Modal */}
-      {isModalOpen && (
+      {isModalOpen && badges.length > 0 && badges[currentBadgeIndex] && (
         <div className="fixed inset-0 bg-black/40 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -456,21 +507,30 @@ export default function BadgeGallery() {
               {/* Badge Image */}
               <div className="flex justify-center mb-6">
                 <div className="w-32 h-32 flex items-center justify-center overflow-hidden">
-                  <Image
-                    src={
-                      badges[currentBadgeIndex].earned
-                        ? badges[currentBadgeIndex].imageComplete
-                        : badges[currentBadgeIndex].imageIncomplete
-                    }
-                    alt={badges[currentBadgeIndex].name}
-                    width={100}
-                    height={100}
-                    className={`object-cover transition-all duration-300 ${
-                      badges[currentBadgeIndex].earned
-                        ? ""
-                        : "grayscale-50 opacity-50"
-                    }`}
-                  />
+                  {badges[currentBadgeIndex]?.imageComplete &&
+                  badges[currentBadgeIndex]?.imageIncomplete ? (
+                    <Image
+                      src={
+                        badges[currentBadgeIndex].isCompleted
+                          ? badges[currentBadgeIndex].imageComplete!
+                          : badges[currentBadgeIndex].imageIncomplete!
+                      }
+                      alt={badges[currentBadgeIndex].name}
+                      width={100}
+                      height={100}
+                      className={`object-cover transition-all duration-300 ${
+                        badges[currentBadgeIndex].isCompleted
+                          ? ""
+                          : "opacity-75"
+                      }`}
+                    />
+                  ) : (
+                    <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">
+                        {badges[currentBadgeIndex]?.id}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -481,36 +541,28 @@ export default function BadgeGallery() {
                     variant="secondary"
                     className="bg-gray-100 text-gray-800 text-sm px-3 py-1"
                   >
-                    {badges[currentBadgeIndex].rarity}
+                    Balance: {badges[currentBadgeIndex].balance}
                   </Badge>
-                  {badges[currentBadgeIndex].earned ? (
+                  {badges[currentBadgeIndex].earned &&
+                  badges[currentBadgeIndex].isCompleted ? (
                     <Badge
                       variant="outline"
                       className="text-green-600 border-green-400 text-sm px-3 py-1"
                     >
-                      ✓ Earned
+                      ✅ Completed
                     </Badge>
-                  ) : (
+                  ) : badges[currentBadgeIndex].earned ? (
                     <Badge
                       variant="outline"
-                      className="text-gray-500 border-gray-400 text-sm px-3 py-1"
+                      className="text-blue-600 border-blue-400 text-sm px-3 py-1"
                     >
                       🥾 In Progress
                     </Badge>
-                  )}
-                  {badges[currentBadgeIndex].earned &&
-                    badges[currentBadgeIndex].isCompleted && (
-                      <Badge
-                        variant="outline"
-                        className="text-blue-600 border-blue-400 text-sm px-3 py-1"
-                      >
-                        🏆 Completed
-                      </Badge>
-                    )}
+                  ) : null}
                 </div>
 
                 {/* Badge Details Section */}
-                {badges[currentBadgeIndex].earned && (
+                {/* {badges[currentBadgeIndex].earned && (
                   <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                     <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Badge Details
@@ -525,7 +577,7 @@ export default function BadgeGallery() {
                       {badges[currentBadgeIndex].uri && (
                         <div>
                           <span className="font-medium">Token URI:</span>{" "}
-                          <span className="break-all">
+                          <span className="break-all text-xs">
                             {badges[currentBadgeIndex].uri}
                           </span>
                         </div>
@@ -533,14 +585,14 @@ export default function BadgeGallery() {
                       {badges[currentBadgeIndex].customUri && (
                         <div>
                           <span className="font-medium">Custom URI:</span>{" "}
-                          <span className="break-all">
+                          <span className="break-all text-xs">
                             {badges[currentBadgeIndex].customUri}
                           </span>
                         </div>
                       )}
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
 
               {/* QR Code Section */}
@@ -548,8 +600,13 @@ export default function BadgeGallery() {
                 {/* Mint to Wallet Section */}
                 <div className="text-center mb-6">
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    Show this qrcode to shop owners/church
+                    Badge Verification QR Code
                   </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Show this QR code to shop owners or churches for
+                    verification and redemption (ID:{" "}
+                    {badges[currentBadgeIndex].id})
+                  </p>
 
                   {isSuccess && (
                     <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -570,36 +627,18 @@ export default function BadgeGallery() {
 
                 {/* QR Code Placeholder */}
                 <div className="flex justify-center mb-4">
-                  <div className="w-48 h-48 bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center mb-2">
-                        <svg
-                          className="w-16 h-16 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1}
-                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M12 12h2m1.5 5h1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                      </div>
-                      <p className="text-xs text-gray-500">QR Code Here</p>
-                    </div>
+                  <div className="p-4 bg-white border-2 border-gray-300 rounded-lg">
+                    <QRCodeSVG
+                      value={JSON.stringify({
+                        userId: address,
+                        badgeId: badges[currentBadgeIndex].id,
+                      })}
+                      size={192}
+                      level="M"
+                      bgColor="#FFFFFF"
+                      fgColor="#000000"
+                    />
                   </div>
-                </div>
-
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                    Shop owners can scan this code to verify your achievement
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500">
-                    Badge ID: {badges[currentBadgeIndex].id} • Earned on Mar 15,
-                    2024
-                  </p>
                 </div>
               </div>
             </div>

@@ -1,30 +1,44 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Webcam from "react-webcam";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import { Button } from "@/components/ui/button";
-import { Camera, AlertCircle, QrCode, Heart, Gift, Award } from "lucide-react";
+import { Camera, X, AlertCircle, Heart, Gift, Award } from "lucide-react";
+import { useAccount } from "wagmi";
 
 export type ScannerMode = "hiker" | "shop" | "church";
 
-interface CameraScannerProps {
-  onScanSuccess: (data: string) => void;
-  onClose?: () => void;
-  isScanning: boolean;
-  mode?: ScannerMode;
+interface ParsedQRData {
+  badgeId?: number;
+  walletAddress?: string;
+  balance?: number;
+  rawData?: string;
+  [key: string]: unknown;
 }
 
-export function CameraScanner({
-  onScanSuccess,
-  isScanning,
-  mode = "hiker",
-}: CameraScannerProps) {
+interface CameraScannerMultiModeProps {
+  mode: ScannerMode;
+  onScanSuccess: (data: string, parsedData?: ParsedQRData) => void;
+  onClose: () => void;
+  isScanning: boolean;
+}
+
+export function CameraScannerMultiMode({ 
+  mode, 
+  onScanSuccess, 
+  onClose, 
+  isScanning 
+}: CameraScannerMultiModeProps) {
   const webcamRef = useRef<Webcam>(null);
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
   const codeReader = useRef(new BrowserMultiFormatReader());
+  const router = useRouter();
+  const { address } = useAccount();
 
   // Mode-specific configuration
   const getModeConfig = () => {
@@ -36,8 +50,7 @@ export function CameraScanner({
           scanningText: "Scanning for donation opportunity...",
           successText: "Donation QR Found!",
           icon: Heart,
-          color: "green",
-          mockData: "DONATION_TRAIL_001_$5_USDC"
+          color: "green"
         };
       case "shop":
         return {
@@ -46,14 +59,7 @@ export function CameraScanner({
           scanningText: "Scanning hiker's badge...",
           successText: "Badge Verified!",
           icon: Gift,
-          color: "blue",
-          mockData: JSON.stringify({
-            badgeId: 1,
-            walletAddress: "0x1234...5678",
-            balance: 5,
-            type: "seasonal",
-            status: "earned"
-          })
+          color: "blue"
         };
       case "church":
         return {
@@ -62,13 +68,7 @@ export function CameraScanner({
           scanningText: "Scanning badge for completion...",
           successText: "Badge Ready for Completion!",
           icon: Award,
-          color: "purple",
-          mockData: JSON.stringify({
-            badgeId: 2,
-            walletAddress: "0x1234...5678",
-            type: "seasonal",
-            status: "earned"
-          })
+          color: "purple"
         };
       default:
         return {
@@ -76,16 +76,131 @@ export function CameraScanner({
           instruction: "Point camera at QR code",
           scanningText: "Scanning...",
           successText: "QR Code Found!",
-          icon: QrCode,
-          color: "gray",
-          mockData: "GENERIC_QR_CODE"
+          icon: Camera,
+          color: "gray"
         };
     }
   };
 
   const config = getModeConfig();
 
-  // Real QR code scanning using ZXing library
+  const handleHikerScan = useCallback(async (qrData: string, parsedData: ParsedQRData) => {
+    // For hikers: navigate to donation form
+    console.log('Hiker scanned donation QR:', parsedData);
+    
+    // Simulate processing delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Navigate to donation flow (you can customize this route)
+    router.push('/hiker?tab=donate&qr=' + encodeURIComponent(qrData));
+  }, [router]);
+
+  const handleShopScan = useCallback(async (qrData: string, parsedData: ParsedQRData) => {
+    // For shop owners: redeem badge value
+    console.log('Shop owner scanning badge for redemption:', parsedData);
+    
+    if (parsedData.badgeId !== undefined && parsedData.walletAddress) {
+      try {
+        // Call redemption API
+        const response = await fetch('/api/framino/redeem-with-paymaster', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tokenId: parsedData.badgeId,
+            amount: parsedData.balance || 1,
+            recipientAddress: parsedData.walletAddress,
+            senderAddress: address, // Shop owner's address
+          }),
+        });
+
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Redemption failed');
+        }
+
+        console.log('Redemption successful:', result);
+      } catch (err) {
+        console.error('Redemption error:', err);
+        throw err;
+      }
+    } else {
+      throw new Error('Invalid badge QR code');
+    }
+  }, [address]);
+
+  const handleChurchScan = useCallback(async (qrData: string, parsedData: ParsedQRData) => {
+    // For churches: mark badge as complete
+    console.log('Church marking badge as complete:', parsedData);
+    
+    if (parsedData.badgeId !== undefined && parsedData.walletAddress) {
+      try {
+        // Call mark-completed API
+        const response = await fetch('/api/framino/mark-completed-with-paymaster', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tokenId: parsedData.badgeId,
+            account: parsedData.walletAddress,
+          }),
+        });
+
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to mark badge as complete');
+        }
+
+        console.log('Badge marked as complete:', result);
+      } catch (err) {
+        console.error('Mark complete error:', err);
+        throw err;
+      }
+    } else {
+      throw new Error('Invalid badge QR code');
+    }
+  }, []);
+
+  const handleScanResult = useCallback(async (qrData: string) => {
+    setProcessing(true);
+    
+    try {
+      let parsedData: ParsedQRData = {};
+      
+      // Try to parse JSON data
+      try {
+        parsedData = JSON.parse(qrData) as ParsedQRData;
+      } catch {
+        // If not JSON, treat as plain text
+        parsedData = { rawData: qrData };
+      }
+
+      // Handle different modes
+      switch (mode) {
+        case "hiker":
+          await handleHikerScan(qrData, parsedData);
+          break;
+        case "shop":
+          await handleShopScan(qrData, parsedData);
+          break;
+        case "church":
+          await handleChurchScan(qrData, parsedData);
+          break;
+      }
+
+      onScanSuccess(qrData, parsedData);
+    } catch (err) {
+      console.error('Error handling scan result:', err);
+      setError('Failed to process QR code');
+    } finally {
+      setProcessing(false);
+    }
+  }, [mode, onScanSuccess, handleHikerScan, handleShopScan, handleChurchScan]);
+
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
 
@@ -116,8 +231,7 @@ export function CameraScanner({
                             const qrData = result.getText();
                             setScanResult(qrData);
                             setScanning(false);
-                            setError(null);
-                            onScanSuccess(qrData);
+                            await handleScanResult(qrData);
                           }
                         } catch {
                           // Silent error - QR code not found in this frame
@@ -132,7 +246,6 @@ export function CameraScanner({
               img.src = imageSrc;
             } catch (err) {
               console.error('Scanner error:', err);
-              setError('Camera scanning error');
             }
           }
         }
@@ -144,7 +257,7 @@ export function CameraScanner({
         clearInterval(intervalId);
       }
     };
-  }, [isScanning, scanning, onScanSuccess]);
+  }, [isScanning, scanning, handleScanResult]);
 
   const startScanning = () => {
     setScanning(true);
@@ -158,10 +271,35 @@ export function CameraScanner({
 
   // Mock scan for demo purposes - uses mode-specific mock data
   const mockScan = () => {
-    setScanResult(config.mockData);
+    const mockData = getMockDataForMode();
+    setScanResult(mockData);
     setScanning(false);
     setError(null);
-    onScanSuccess(config.mockData);
+    onScanSuccess(mockData);
+  };
+
+  const getMockDataForMode = () => {
+    switch (mode) {
+      case "hiker":
+        return "DONATION_TRAIL_001_$5_USDC";
+      case "shop":
+        return JSON.stringify({
+          badgeId: 1,
+          walletAddress: "0x1234...5678",
+          balance: 5,
+          type: "seasonal",
+          status: "earned"
+        });
+      case "church":
+        return JSON.stringify({
+          badgeId: 2,
+          walletAddress: "0x1234...5678",
+          type: "seasonal",
+          status: "earned"
+        });
+      default:
+        return "GENERIC_QR_CODE";
+    }
   };
 
   const getColorClasses = (color: string) => {
@@ -207,7 +345,14 @@ export function CameraScanner({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between"></div>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {config.title}
+        </h3>
+        <Button variant="ghost" size="sm" onClick={onClose}>
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
 
       <div className="relative">
         {/* Camera View */}
@@ -219,11 +364,11 @@ export function CameraScanner({
             videoConstraints={{
               width: 400,
               height: 400,
-              facingMode: "environment", // Use back camera on mobile
+              facingMode: "environment" // Use back camera on mobile
             }}
             className="w-full h-full object-cover"
           />
-
+          
           {/* Scanning overlay */}
           {scanning && (
             <div className="absolute inset-0 flex items-center justify-center">
@@ -235,26 +380,28 @@ export function CameraScanner({
               </div>
             </div>
           )}
-
-          {/* Demo QR code indicator */}
-          {!scanning && !scanResult && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-white bg-black/50 p-4 rounded-lg">
-                <IconComponent className="h-12 w-12 mx-auto mb-2" />
-                <p className="text-sm">{config.instruction}</p>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Instructions */}
         <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-4">
-          {scanning ? `${config.scanningText} Hold steady for best results.` : config.instruction}
+          {scanning ? config.scanningText : config.instruction}
         </p>
       </div>
 
+      {/* Processing State */}
+      {processing && (
+        <div className={`p-4 ${colors.bg} rounded-lg border ${colors.borderColor}`}>
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+            <span className={`text-sm font-medium ${colors.text}`}>
+              Processing {mode} action...
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Scan Result */}
-      {scanResult && (
+      {scanResult && !processing && (
         <div className={`p-4 ${colors.bg} rounded-lg border ${colors.borderColor}`}>
           <div className="flex items-center space-x-2">
             <IconComponent className={`h-5 w-5 ${colors.icon}`} />
@@ -263,7 +410,7 @@ export function CameraScanner({
             </span>
           </div>
           <p className={`text-xs ${colors.text} mt-1 opacity-75`}>
-            QR Data: {scanResult.length > 50 ? `${scanResult.substring(0, 50)}...` : scanResult}
+            Data: {scanResult.substring(0, 50)}...
           </p>
         </div>
       )}
@@ -284,19 +431,25 @@ export function CameraScanner({
       <div className="flex justify-center space-x-3">
         {!scanning ? (
           <>
-            <Button
-              onClick={startScanning}
+            <Button 
+              onClick={startScanning} 
               className={`${colors.button} text-white`}
+              disabled={processing}
             >
               <Camera className="h-4 w-4 mr-2" />
               Start Scanning
             </Button>
-            <Button onClick={mockScan} variant="outline" className="text-sm">
+            <Button 
+              onClick={mockScan} 
+              variant="outline" 
+              className="text-sm"
+              disabled={processing}
+            >
               Demo Scan
             </Button>
           </>
         ) : (
-          <Button onClick={stopScanning} variant="outline">
+          <Button onClick={stopScanning} variant="outline" disabled={processing}>
             Stop Scanning
           </Button>
         )}
