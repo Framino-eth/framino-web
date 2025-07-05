@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Heart } from "lucide-react";
+import NumberFlow from "@number-flow/react";
 
 export default function DonationForm() {
-  const [donationAmount, setDonationAmount] = useState<string>("1");
+  const [donationAmount, setDonationAmount] = useState<number>(1);
   const [sliderValue, setSliderValue] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -19,14 +20,14 @@ export default function DonationForm() {
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     setSliderValue(value);
-    setDonationAmount(value.toString());
+    setDonationAmount(value);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // Only allow numbers and decimal point
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      setDonationAmount(value);
+      setDonationAmount(value === "" ? 0 : parseFloat(value));
       // Update slider if value is within range and is a valid number
       const numValue = parseFloat(value);
       if (!isNaN(numValue) && numValue >= minAmount && numValue <= maxAmount) {
@@ -38,7 +39,7 @@ export default function DonationForm() {
   };
 
   const handleSubmit = async () => {
-    if (!donationAmount || parseFloat(donationAmount) <= 0) return;
+    if (!donationAmount || donationAmount <= 0) return;
 
     setIsSubmitting(true);
 
@@ -50,7 +51,7 @@ export default function DonationForm() {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Reset form after successful donation
-      setDonationAmount("1");
+      setDonationAmount(1);
       setSliderValue(1);
       alert(
         `Successfully donated ${donationAmount} USDC! Thank you for your contribution.`
@@ -63,7 +64,7 @@ export default function DonationForm() {
     }
   };
 
-  const isValidAmount = donationAmount && parseFloat(donationAmount) > 0;
+  const isValidAmount = donationAmount && donationAmount > 0;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -90,18 +91,16 @@ export default function DonationForm() {
             </label>
             <div className="space-y-4">
               {/* Current Amount Display with Animation */}
-              <div className="text-center">
+              <div className="text-center text-6xl font-semibold">
                 <AnimatePresence mode="wait">
-                  <motion.div
-                    key={donationAmount}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.2 }}
-                    className="text-3xl font-bold text-green-600 dark:text-green-400"
-                  >
-                    ${donationAmount || "0"}
-                  </motion.div>
+                  <NumberFlow
+                    value={donationAmount}
+                    format={{
+                      style: "currency",
+                      currency: "USD",
+                      trailingZeroDisplay: "stripIfInteger",
+                    }}
+                  />
                 </AnimatePresence>
               </div>
 
@@ -133,7 +132,7 @@ export default function DonationForm() {
           </div>
 
           {/* Custom Amount Input */}
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Custom Amount (USDC)
             </label>
@@ -151,7 +150,7 @@ export default function DonationForm() {
                 className="pl-8 text-lg h-12 border-gray-300 dark:border-gray-600"
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Donation Summary */}
           {isValidAmount && (
@@ -178,7 +177,7 @@ export default function DonationForm() {
                   Total:
                 </span>
                 <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  ~${(parseFloat(donationAmount) + 0.01).toFixed(2)} USDC
+                  ~${(donationAmount + 0.01).toFixed(2)} USDC
                 </span>
               </div>
             </div>

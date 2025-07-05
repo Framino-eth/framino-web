@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@number-flow/react": "^0.5.10",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@types/mapbox-gl": "^3.4.1",
