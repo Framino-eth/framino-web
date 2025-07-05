@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +17,6 @@ import {
   IceCream,
   Zap,
   Heart,
-  ArrowLeft,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
