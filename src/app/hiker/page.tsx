@@ -10,7 +10,7 @@ import {
 import MapSection from "@/components/MapSection";
 import BadgeGallery from "@/components/BadgeGallery";
 import DonationForm from "@/components/DonationForm";
-// import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { WalletConnectButton } from "@/components/WalletConnectButton";
 
 export default function HikerPage() {
@@ -30,7 +30,7 @@ export default function HikerPage() {
             </div>
             <div className="flex items-center space-x-4">
               <WalletConnectButton />
-              {/* <ThemeToggle /> */}
+              <ThemeToggle />
             </div>
           </div>
         </div>
