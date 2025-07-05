@@ -466,7 +466,7 @@ export default function AdminPage() {
             </DrawerTitle>
             <DrawerDescription>
               {checkoutStep === "scan" &&
-                "Scan the hiker's badge to verify their identity"}
+                "Scan the hiker`s badge to verify their identity"}
               {checkoutStep === "confirm" &&
                 "Review the items and confirm the redemption"}
               {checkoutStep === "redeem" &&
