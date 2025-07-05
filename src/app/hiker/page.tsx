@@ -146,6 +146,7 @@ const mockBadges = [
 export default function HikerPage() {
   const [activeTab, setActiveTab] = useState<"map" | "badges">("map");
   const [currentBadgeIndex, setCurrentBadgeIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const nextBadge = () => {
     setCurrentBadgeIndex((prev) => (prev + 1) % mockBadges.length);
@@ -153,6 +154,16 @@ export default function HikerPage() {
 
   const prevBadge = () => {
     setCurrentBadgeIndex((prev) => (prev - 1 + mockBadges.length) % mockBadges.length);
+  };
+
+  const handleBadgeClick = (index: number) => {
+    if (index === currentBadgeIndex) {
+      // If clicking on the active badge, open modal
+      setIsModalOpen(true);
+    } else {
+      // If clicking on a different badge, navigate to it
+      setCurrentBadgeIndex(index);
+    }
   };
 
   const getScaleAndOpacity = (index: number) => {
@@ -348,7 +359,7 @@ export default function HikerPage() {
                             duration: 0.5,
                             ease: "easeInOut"
                           }}
-                          onClick={() => setCurrentBadgeIndex(index)}
+                          onClick={() => handleBadgeClick(index)}
                         >
                           <div 
                             className={`w-56 h-56 rounded-full bg-gray-100 flex items-center justify-center shadow-lg overflow-hidden transition-all ${
@@ -448,6 +459,135 @@ export default function HikerPage() {
           </div>
         )}
       </div>
+
+      {/* Badge Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+          >
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  {mockBadges[currentBadgeIndex].name}
+                </h2>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              {/* Badge Image */}
+              <div className="flex justify-center mb-6">
+                <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center shadow-lg overflow-hidden">
+                  <Image 
+                    src={mockBadges[currentBadgeIndex].earned ? mockBadges[currentBadgeIndex].imageComplete : mockBadges[currentBadgeIndex].imageIncomplete}
+                    alt={mockBadges[currentBadgeIndex].name}
+                    width={128}
+                    height={128}
+                    className={`object-cover transition-all duration-300 ${
+                      mockBadges[currentBadgeIndex].earned ? "" : "grayscale-50 opacity-50"
+                    }`}
+                  />
+                </div>
+              </div>
+
+              {/* Badge Info */}
+              <div className="text-center mb-6">
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  {mockBadges[currentBadgeIndex].description}
+                </p>
+                <div className="flex items-center justify-center space-x-3 mb-4">
+                  <Badge 
+                    variant="secondary" 
+                    className="bg-gray-100 text-gray-800 text-sm px-3 py-1"
+                  >
+                    {mockBadges[currentBadgeIndex].rarity}
+                  </Badge>
+                  {mockBadges[currentBadgeIndex].earned ? (
+                    <Badge variant="outline" className="text-green-600 border-green-400 text-sm px-3 py-1">
+                      ✓ Earned
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-gray-500 border-gray-400 text-sm px-3 py-1">
+                      🥾 In Progress
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              {/* QR Code Section - Only show if earned */}
+              {mockBadges[currentBadgeIndex].earned && (
+                <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-gray-50 dark:bg-gray-900/50">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 text-center">
+                    Verification QR Code
+                  </h3>
+                  
+                  {/* QR Code Placeholder */}
+                  <div className="flex justify-center mb-4">
+                    <div className="w-48 h-48 bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center mb-2">
+                          <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M12 12h2m1.5 5h1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                          </svg>
+                        </div>
+                        <p className="text-xs text-gray-500">QR Code Here</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      Shop owners can scan this code to verify your achievement
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500">
+                      Badge ID: {mockBadges[currentBadgeIndex].id} • Earned on Mar 15, 2024
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Not Earned Message */}
+              {!mockBadges[currentBadgeIndex].earned && (
+                <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-gray-50 dark:bg-gray-900/50 text-center">
+                  <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-2xl">🔒</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    Badge Not Earned Yet
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Complete the required hiking challenges to unlock this badge and its verification QR code.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+              <Button 
+                onClick={() => setIsModalOpen(false)}
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white"
+              >
+                Close
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
