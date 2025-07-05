@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState } from "react";
 import Webcam from "react-webcam";
 import { Button } from "@/components/ui/button";
-import { Camera, X, CheckCircle, AlertCircle, QrCode } from "lucide-react";
+import { Camera, CheckCircle, AlertCircle, QrCode } from "lucide-react";
 
 interface CameraScannerProps {
   onScanSuccess: (data: string) => void;

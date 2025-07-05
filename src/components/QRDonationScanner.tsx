@@ -10,7 +10,6 @@ import {
   Heart,
   CheckCircle,
   AlertCircle,
-  Coins,
   Gift
 } from "lucide-react";
 import NumberFlow from "@number-flow/react";
