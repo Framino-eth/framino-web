@@ -4,7 +4,6 @@ import { useState } from "react";
 import { AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Heart } from "lucide-react";
 import NumberFlow from "@number-flow/react";
 
@@ -21,21 +20,6 @@ export default function DonationForm() {
     const value = parseInt(e.target.value);
     setSliderValue(value);
     setDonationAmount(value);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Only allow numbers and decimal point
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      setDonationAmount(value === "" ? 0 : parseFloat(value));
-      // Update slider if value is within range and is a valid number
-      const numValue = parseFloat(value);
-      if (!isNaN(numValue) && numValue >= minAmount && numValue <= maxAmount) {
-        setSliderValue(Math.round(numValue));
-      } else if (value === "") {
-        setSliderValue(minAmount);
-      }
-    }
   };
 
   const handleSubmit = async () => {
@@ -131,26 +115,6 @@ export default function DonationForm() {
             </div>
           </div>
 
-          {/* Custom Amount Input */}
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Custom Amount (USDC)
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="text-gray-500 text-lg">$</span>
-              </div>
-              <Input
-                type="number"
-                min={minAmount}
-                max={maxAmount}
-                value={donationAmount}
-                onChange={handleInputChange}
-                placeholder="0"
-                className="pl-8 text-lg h-12 border-gray-300 dark:border-gray-600"
-              />
-            </div>
-          </div> */}
 
           {/* Donation Summary */}
           {isValidAmount && (
