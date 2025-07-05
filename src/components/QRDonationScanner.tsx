@@ -5,13 +5,7 @@ import { AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CameraScanner } from "@/components/CameraScannerNew";
-import { 
-  QrCode,
-  Heart,
-  CheckCircle,
-  AlertCircle,
-  Gift
-} from "lucide-react";
+import { QrCode, Heart, CheckCircle, AlertCircle, Gift } from "lucide-react";
 import NumberFlow from "@number-flow/react";
 
 interface DonationInfo {
@@ -47,14 +41,14 @@ export default function QRDonationScanner() {
     currency: "USDC",
     description: "Help maintain hiking trails in the area",
     beneficiary: "Mountain Trail Preservation Society",
-    qrId: null as string | null
+    qrId: null as string | null,
   };
 
   const handleScanSuccess = (qrData: string) => {
     // In a real app, you'd parse the QR code data to extract donation info
     const donationData = {
       ...mockDonationData,
-      qrId: qrData
+      qrId: qrData,
     };
     setDonationInfo(donationData);
     setIsScanning(false);
@@ -71,14 +65,33 @@ export default function QRDonationScanner() {
 
   const handleConfirmDonation = async () => {
     setProcessingDonation(true);
-    
+
     try {
       // Simulate donation processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      //   await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Call the actual API endpoint
+      const response = await fetch("/api/framino/donate-usdc-with-paymaster", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: customAmount.toString(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Donation failed");
+      }
       // In a real app, this would process the blockchain transaction
-      console.log('Processing donation:', { ...donationInfo, amount: customAmount });
-      
+      console.log("Processing donation:", {
+        ...donationInfo,
+        amount: customAmount,
+      });
+
       // Success - reset state
       setTimeout(() => {
         setDonationInfo(null);
@@ -86,9 +99,8 @@ export default function QRDonationScanner() {
         setCustomAmount(25);
         setSliderValue(25);
       }, 2000);
-      
     } catch (error) {
-      console.error('Donation failed:', error);
+      console.error("Donation failed:", error);
       setProcessingDonation(false);
     }
   };
@@ -127,9 +139,10 @@ export default function QRDonationScanner() {
               <QrCode className="h-16 w-16 text-gray-400" />
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Look for QR codes on trail signs, information boards, or donation displays
+              Look for QR codes on trail signs, information boards, or donation
+              displays
             </p>
-            <Button 
+            <Button
               onClick={handleStartScanning}
               className="w-full bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900"
             >
@@ -187,7 +200,7 @@ export default function QRDonationScanner() {
                 <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
                   {donationInfo.description}
                 </p>
-                
+
                 {/* Amount Selector */}
                 <div className="space-y-4">
                   {/* Current Amount Display with Animation */}
@@ -215,10 +228,12 @@ export default function QRDonationScanner() {
                       className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider dark:bg-gray-600"
                       style={{
                         background: `linear-gradient(to right, #10b981 0%, #10b981 ${
-                          ((sliderValue - minAmount) / (maxAmount - minAmount)) *
+                          ((sliderValue - minAmount) /
+                            (maxAmount - minAmount)) *
                           100
                         }%, #e5e7eb66 ${
-                          ((sliderValue - minAmount) / (maxAmount - minAmount)) *
+                          ((sliderValue - minAmount) /
+                            (maxAmount - minAmount)) *
                           100
                         }%, #e5e7eb66 100%)`,
                       }}
@@ -228,7 +243,7 @@ export default function QRDonationScanner() {
                       <span>${maxAmount}</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
                     <span className="text-sm text-gray-600 dark:text-gray-400">
                       Your Donation:
@@ -314,26 +329,35 @@ export default function QRDonationScanner() {
             <div className="space-y-3">
               <div className="flex items-start space-x-3">
                 <div className="w-6 h-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">1</span>
+                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">
+                    1
+                  </span>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Find QR codes on trail signs, visitor centers, or park information boards
+                  Find QR codes on trail signs, visitor centers, or park
+                  information boards
                 </p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="w-6 h-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">2</span>
+                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">
+                    2
+                  </span>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Scan the QR code to reveal donation details and impact information
+                  Scan the QR code to reveal donation details and impact
+                  information
                 </p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="w-6 h-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">3</span>
+                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">
+                    3
+                  </span>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Confirm your donation and it will be processed using your connected wallet
+                  Confirm your donation and it will be processed using your
+                  connected wallet
                 </p>
               </div>
             </div>

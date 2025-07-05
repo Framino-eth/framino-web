@@ -28,21 +28,35 @@ export default function DonationForm() {
     setIsSubmitting(true);
 
     try {
-      // TODO: Implement actual donation logic here
       console.log(`Donating ${donationAmount} USDC`);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Call the actual API endpoint
+      const response = await fetch('/api/framino/donate-usdc-with-paymaster', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: donationAmount.toString(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Donation failed');
+      }
 
       // Reset form after successful donation
       setDonationAmount(1);
       setSliderValue(1);
       alert(
-        `Successfully donated ${donationAmount} USDC! Thank you for your contribution.`
+        `Successfully donated ${donationAmount} USDC! Transaction: ${data.data?.transactionHash || 'completed'}`
       );
     } catch (error) {
       console.error("Donation failed:", error);
-      alert("Donation failed. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Donation failed: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }
