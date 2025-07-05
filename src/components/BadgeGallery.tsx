@@ -1,102 +1,242 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Trophy,
   ChevronLeft,
   ChevronRight,
-  Wallet,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 import { useAccount } from "wagmi";
 import { useMintBadge } from "@/hooks/useMintBadge";
+import { readContracts } from "@wagmi/core";
+import { config } from "@/lib/wagmi";
+import FraminoNFTABI from "@/lib/abi/FraminoNFT.json";
+import { Abi } from "viem";
+import { StaticImageData } from "next/image";
 
 // Import seasonal badge images
-import springComplete from "@/assets/spring-complete.png";
-import spring from "@/assets/spring.png";
-import summerComplete from "@/assets/summer-complete.png";
-import summer from "@/assets/summer.png";
-import autumnComplete from "@/assets/autumn-complete.png";
-import autumn from "@/assets/autumn.png";
-import winterComplete from "@/assets/winter-complete.png";
-import winter from "@/assets/winter.png";
+// import springComplete from "@/assets/spring-complete.png";
+// import spring from "@/assets/spring.png";
+// import summerComplete from "@/assets/summer-complete.png";
+// import summer from "@/assets/summer.png";
+// import autumnComplete from "@/assets/autumn-complete.png";
+// import autumn from "@/assets/autumn.png";
+// import winterComplete from "@/assets/winter-complete.png";
+// import winter from "@/assets/winter.png";
 
 // Mock data for badges/NFTs
-const mockBadges = [
-  {
-    id: 1,
-    name: "Donation #1",
-    description: "Complete hiking challenges during spring season",
-    rarity: "25 / 100",
-    earned: false,
-    imageComplete: springComplete,
-    imageIncomplete: spring,
-  },
-  {
-    id: 2,
-    name: "Donation #2",
-    description: "Conquer trails under the summer sun",
-    rarity: "40 / 100",
-    earned: false,
-    imageComplete: summerComplete,
-    imageIncomplete: summer,
-  },
-  {
-    id: 3,
-    name: "Donation #3",
-    description: "Discover the beauty of fall hiking",
-    rarity: "60 / 100",
-    earned: false,
-    imageComplete: autumnComplete,
-    imageIncomplete: autumn,
-  },
-  {
-    id: 4,
-    name: "Donation #4",
-    description: "Brave the cold on winter expeditions",
-    rarity: "15 / 100",
-    earned: false,
-    imageComplete: winterComplete,
-    imageIncomplete: winter,
-  },
-];
+const mockBadges: EnhancedBadge[] = [];
+console.log(mockBadges);
+
+interface EnhancedBadge {
+  id: number;
+  name: string;
+  description: string;
+  rarity: string;
+  earned: boolean;
+  imageComplete: StaticImageData;
+  imageIncomplete: StaticImageData;
+  balance?: number;
+  isCompleted?: boolean;
+  uri?: string;
+  customUri?: string;
+}
 
 export default function BadgeGallery() {
   const [currentBadgeIndex, setCurrentBadgeIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+  const [isLoading, setIsLoading] = useState(false);
+  const [badges, setBadges] = useState<EnhancedBadge[]>(mockBadges);
+  const [lastFetchedAddress, setLastFetchedAddress] = useState<string | null>(
+    null
+  );
+
   const { address, isConnected } = useAccount();
-  const { mintBadge, isPending, isConfirming, isSuccess, error, hash } = useMintBadge();
+  const { isSuccess, error, hash } = useMintBadge();
 
-  const handleMintBadge = async () => {
-    if (!address || !isConnected) {
-      alert("Please connect your wallet first");
-      return;
+  const contractAddress =
+    process.env.NEXT_PUBLIC_FRAMINO_NFT_CONTRACT_ADDRESS ||
+    "0x73050b11f0Dd5C48Ed1C05c56236F0D235ba4f57";
+
+  // Optimized fetch function - get balances first, then details for owned badges only
+  const fetchUserNFTs = useCallback(
+    async (walletAddress: string) => {
+      if (!walletAddress || isLoading) return;
+
+      setIsLoading(true);
+
+      try {
+        // Query all possible NFT IDs (0-7 based on your contract)
+        const tokenIds = [0, 1, 2, 3, 4, 5, 6, 7];
+
+        // First, fetch balances to determine which NFTs the user owns
+        const balanceCalls = tokenIds.map((id) => ({
+          address: contractAddress as `0x${string}`,
+          abi: FraminoNFTABI as Abi,
+          functionName: "getBalance",
+          args: [walletAddress, id],
+        }));
+
+        const balances = await readContracts(config, {
+          contracts: balanceCalls,
+        });
+
+        // Find which tokens the user owns
+        const ownedTokenIds: number[] = [];
+        tokenIds.forEach((tokenId, index) => {
+          const balance = (balances[index].result as number) || 0;
+          if (balance > 0) {
+            ownedTokenIds.push(tokenId);
+          }
+        });
+
+        // If user owns badges, fetch details for those badges only
+        const badgeDetails: Record<
+          number,
+          { isCompleted: boolean; uri: string; customUri?: string; value?: number }
+        > = {};
+
+        if (ownedTokenIds.length > 0) {
+          console.log(
+            `Fetching details for ${ownedTokenIds.length} owned badges...`
+          );
+
+          // Fetch details only for owned badges
+          const completedCalls = ownedTokenIds.map((id) => ({
+            address: contractAddress as `0x${string}`,
+            abi: FraminoNFTABI as Abi,
+            functionName: "isCompleted",
+            args: [walletAddress, id],
+          }));
+
+          const uriCalls = ownedTokenIds.map((id) => ({
+            address: contractAddress as `0x${string}`,
+            abi: FraminoNFTABI as Abi,
+            functionName: "getUserTokenURI",
+            args: [walletAddress, id],
+          }));
+
+          const customUriCalls = ownedTokenIds.map((id) => ({
+            address: contractAddress as `0x${string}`,
+            abi: FraminoNFTABI as Abi,
+            functionName: "customURIs",
+            args: [walletAddress, id],
+          }));
+
+          // Execute detail calls for owned badges
+          const [completedStatus, uris, customUris] = await Promise.all([
+            readContracts(config, { contracts: completedCalls }),
+            readContracts(config, { contracts: uriCalls }),
+            readContracts(config, { contracts: customUriCalls }),
+          ]);
+
+          // Process details for owned badges
+          ownedTokenIds.forEach((tokenId, index) => {
+            badgeDetails[tokenId] = {
+              isCompleted: (completedStatus[index].result as boolean) || false,
+              uri: (uris[index].result as string) || "",
+              customUri: (customUris[index].result as string) || undefined,
+            };
+          });
+        }
+
+        // Update badges with ownership and detail data
+        const updatedBadges = mockBadges.map((badge) => {
+          const isOwned = ownedTokenIds.includes(badge.id);
+          const details = badgeDetails[badge.id];
+
+          return {
+            ...badge,
+            earned: isOwned,
+            balance: isOwned ? 1 : 0,
+            isCompleted: details?.isCompleted || false,
+            uri: details?.uri || "",
+            customUri: details?.customUri,
+          };
+        });
+
+        setBadges(updatedBadges);
+        setLastFetchedAddress(walletAddress);
+
+        // Enhanced console log with details
+        console.log("=== USER NFT DATA ===");
+        console.log("Total NFTs owned:", ownedTokenIds.length);
+        console.log("Owned token IDs:", ownedTokenIds);
+        if (ownedTokenIds.length > 0) {
+          console.log("Badge Details:");
+          ownedTokenIds.forEach((tokenId) => {
+            const badge = updatedBadges.find((b) => b.id === tokenId);
+            console.log(`- Badge ${tokenId} (${badge?.name}):`, {
+              completed: badgeDetails[tokenId]?.isCompleted,
+              uri: badgeDetails[tokenId]?.uri,
+              customUri: badgeDetails[tokenId]?.customUri,
+            });
+          });
+        }
+        console.log("===================");
+      } catch (err) {
+        console.error("Error fetching NFT data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [contractAddress, isLoading]
+  );
+
+  // Optimized useEffect with proper dependency management
+  useEffect(() => {
+    // Only fetch if:
+    // 1. Wallet is connected
+    // 2. Address exists
+    // 3. Address has changed since last fetch
+    // 4. Not currently loading
+    if (
+      isConnected &&
+      address &&
+      address !== lastFetchedAddress &&
+      !isLoading
+    ) {
+      fetchUserNFTs(address);
     }
 
-    const currentBadge = mockBadges[currentBadgeIndex];
-    try {
-      // In a real app, you'd generate proper metadata URI
-      const metadataUri = `https://api.framino.com/metadata/${currentBadge.id}`;
-      await mintBadge(address, currentBadge.id, metadataUri);
-    } catch (err) {
-      console.error("Failed to mint badge:", err);
+    // Reset data when wallet disconnects
+    if (!isConnected && lastFetchedAddress) {
+      setBadges(mockBadges);
+      setLastFetchedAddress(null);
     }
-  };
+  }, [isConnected, address, lastFetchedAddress, fetchUserNFTs, isLoading]);
+
+  // Refresh NFT data after successful minting
+  useEffect(() => {
+    if (isSuccess && address && !isLoading) {
+      // Add a small delay to allow blockchain to update
+      const timer = setTimeout(() => {
+        setLastFetchedAddress(null); // Force refetch
+        fetchUserNFTs(address);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, address, fetchUserNFTs, isLoading]);
 
   const nextBadge = () => {
-    setCurrentBadgeIndex((prev) => (prev + 1) % mockBadges.length);
+    setCurrentBadgeIndex((prev) => (prev + 1) % badges.length);
   };
 
   const prevBadge = () => {
-    setCurrentBadgeIndex(
-      (prev) => (prev - 1 + mockBadges.length) % mockBadges.length
-    );
+    setCurrentBadgeIndex((prev) => (prev - 1 + badges.length) % badges.length);
   };
 
   const handleBadgeClick = (index: number) => {
@@ -130,134 +270,147 @@ export default function BadgeGallery() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Loading State */}
+          {isLoading && (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 mx-auto mb-4"></div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Loading your NFT badges...
+              </p>
+            </div>
+          )}
+
           {/* Badge Carousel */}
-          <div className="relative">
-            {/* Carousel Container */}
-            <div className="relative h-80 flex items-center justify-center overflow-hidden">
-              {mockBadges.map((badge, index) => {
-                const { scale, opacity, zIndex } = getScaleAndOpacity(index);
-                const isActive = index === currentBadgeIndex;
-                const distance = index - currentBadgeIndex;
-                const translateX = distance * 240; // Spread badges horizontally
+          {!isLoading && (
+            <div>
+              <div className="relative">
+                {/* Carousel Container */}
+                <div className="relative h-80 flex items-center justify-center overflow-hidden">
+                  {badges?.map((badge, index) => {
+                    const { scale, opacity, zIndex } =
+                      getScaleAndOpacity(index);
+                    const isActive = index === currentBadgeIndex;
+                    const distance = index - currentBadgeIndex;
+                    const translateX = distance * 240; // Spread badges horizontally
 
-                return (
-                  <motion.div
-                    key={badge.id}
-                    className="absolute cursor-pointer"
-                    style={{ zIndex }}
-                    animate={{
-                      scale,
-                      opacity,
-                      x: translateX,
-                    }}
-                    transition={{
-                      duration: 0.5,
-                      ease: "easeInOut",
-                    }}
-                    onClick={() => handleBadgeClick(index)}
-                  >
-                    <div
-                      className={`w-56 h-56 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center shadow-lg overflow-hidden transition-all ${
-                        isActive
-                          ? "ring-4 ring-gray-300 dark:ring-gray-600"
-                          : ""
-                      }`}
-                    >
-                      <Image
-                        src={
-                          badge.earned
-                            ? badge.imageComplete
-                            : badge.imageIncomplete
-                        }
-                        alt={badge.name}
-                        width={144}
-                        height={144}
-                        className={`object-cover transition-all duration-300 ${
-                          badge.earned ? "" : "grayscale-50 opacity-50"
-                        }`}
-                      />
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
+                    return (
+                      <motion.div
+                        key={badge.id}
+                        className="absolute cursor-pointer"
+                        style={{ zIndex }}
+                        animate={{
+                          scale,
+                          opacity,
+                          x: translateX,
+                        }}
+                        transition={{
+                          duration: 0.5,
+                          ease: "easeInOut",
+                        }}
+                        onClick={() => handleBadgeClick(index)}
+                      >
+                        <div
+                          className={`w-56 h-56 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center shadow-lg overflow-hidden transition-all ${
+                            isActive
+                              ? "ring-4 ring-gray-300 dark:ring-gray-600"
+                              : ""
+                          }`}
+                        >
+                          <Image
+                            src={
+                              badge.earned
+                                ? badge.imageComplete
+                                : badge.imageIncomplete
+                            }
+                            alt={badge.name}
+                            width={144}
+                            height={144}
+                            className={`object-cover transition-all duration-300 ${
+                              badge.earned ? "" : "grayscale-50 opacity-50"
+                            }`}
+                          />
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
 
-            {/* Navigation Buttons */}
-            <div className="absolute top-1/2 -translate-y-1/2 left-4">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={prevBadge}
-                className="h-10 w-10 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-            </div>
-            <div className="absolute top-1/2 -translate-y-1/2 right-4">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={nextBadge}
-                className="h-10 w-10 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Badge Information Area */}
-          <div className="mt-8 text-center">
-            <motion.div
-              key={currentBadgeIndex}
-              initial={{ opacity: 0.25, y: 0 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-            >
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                {mockBadges[currentBadgeIndex].name}
-              </h3>
-              <div className="flex items-center justify-center space-x-3">
-                <Badge
-                  variant="secondary"
-                  className="bg-gray-100 text-gray-800 text-sm px-3 py-1"
-                >
-                  {mockBadges[currentBadgeIndex].rarity}
-                </Badge>
-                {mockBadges[currentBadgeIndex].earned && (
-                  <Badge
+                {/* Navigation Buttons */}
+                <div className="absolute top-1/2 -translate-y-1/2 left-4">
+                  <Button
                     variant="outline"
-                    className="text-green-600 border-green-400 text-sm px-3 py-1"
+                    size="icon"
+                    onClick={prevBadge}
+                    className="h-10 w-10 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
                   >
-                    ✓ Earned
-                  </Badge>
-                )}
-                {!mockBadges[currentBadgeIndex].earned && (
-                  <Badge
+                    <ChevronLeft className="h-5 w-5" />
+                  </Button>
+                </div>
+                <div className="absolute top-1/2 -translate-y-1/2 right-4">
+                  <Button
                     variant="outline"
-                    className="text-gray-500 border-gray-400 text-sm px-3 py-1"
+                    size="icon"
+                    onClick={nextBadge}
+                    className="h-10 w-10 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
                   >
-                    🥾 In Progress
-                  </Badge>
-                )}
+                    <ChevronRight className="h-5 w-5" />
+                  </Button>
+                </div>
               </div>
-            </motion.div>
-          </div>
 
-          {/* Progress Dots */}
-          <div className="flex justify-center space-x-2 mt-6">
-            {mockBadges.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentBadgeIndex(index)}
-                className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                  index === currentBadgeIndex
-                    ? "bg-gray-800 dark:bg-gray-300 w-8"
-                    : "bg-gray-300 dark:bg-gray-600"
-                }`}
-              />
-            ))}
-          </div>
+              <div className="mt-8 text-center">
+                <motion.div
+                  key={currentBadgeIndex}
+                  initial={{ opacity: 0.25, y: 0 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                >
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    {badges[currentBadgeIndex]?.name}
+                  </h3>
+                  <div className="flex items-center justify-center space-x-3">
+                    <Badge
+                      variant="secondary"
+                      className="bg-gray-100 text-gray-800 text-sm px-3 py-1"
+                    >
+                      {badges[currentBadgeIndex]?.rarity}
+                    </Badge>
+                    {badges[currentBadgeIndex]?.earned &&
+                    badges[currentBadgeIndex]?.isCompleted ? (
+                      <Badge
+                        variant="outline"
+                        className="text-blue-600 border-blue-400 text-sm px-3 py-1"
+                      >
+                        🏆 Completed
+                      </Badge>
+                    ) : (
+                      <Badge
+                        variant="outline"
+                        className="text-gray-500 border-gray-400 text-sm px-3 py-1"
+                      >
+                        🥾 In Progress
+                      </Badge>
+                    )}
+                  </div>
+                </motion.div>
+              </div>
+
+              <div className="flex justify-center space-x-2 mt-6">
+                {badges.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentBadgeIndex(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                      index === currentBadgeIndex
+                        ? "bg-gray-800 dark:bg-gray-300 w-8"
+                        : "bg-gray-300 dark:bg-gray-600"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -275,7 +428,7 @@ export default function BadgeGallery() {
             <div className="p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {mockBadges[currentBadgeIndex].name}
+                  {badges[currentBadgeIndex].name}
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -305,15 +458,15 @@ export default function BadgeGallery() {
                 <div className="w-32 h-32 flex items-center justify-center overflow-hidden">
                   <Image
                     src={
-                      mockBadges[currentBadgeIndex].earned
-                        ? mockBadges[currentBadgeIndex].imageComplete
-                        : mockBadges[currentBadgeIndex].imageIncomplete
+                      badges[currentBadgeIndex].earned
+                        ? badges[currentBadgeIndex].imageComplete
+                        : badges[currentBadgeIndex].imageIncomplete
                     }
-                    alt={mockBadges[currentBadgeIndex].name}
+                    alt={badges[currentBadgeIndex].name}
                     width={100}
                     height={100}
                     className={`object-cover transition-all duration-300 ${
-                      mockBadges[currentBadgeIndex].earned
+                      badges[currentBadgeIndex].earned
                         ? ""
                         : "grayscale-50 opacity-50"
                     }`}
@@ -328,9 +481,9 @@ export default function BadgeGallery() {
                     variant="secondary"
                     className="bg-gray-100 text-gray-800 text-sm px-3 py-1"
                   >
-                    {mockBadges[currentBadgeIndex].rarity}
+                    {badges[currentBadgeIndex].rarity}
                   </Badge>
-                  {mockBadges[currentBadgeIndex].earned ? (
+                  {badges[currentBadgeIndex].earned ? (
                     <Badge
                       variant="outline"
                       className="text-green-600 border-green-400 text-sm px-3 py-1"
@@ -345,7 +498,49 @@ export default function BadgeGallery() {
                       🥾 In Progress
                     </Badge>
                   )}
+                  {badges[currentBadgeIndex].earned &&
+                    badges[currentBadgeIndex].isCompleted && (
+                      <Badge
+                        variant="outline"
+                        className="text-blue-600 border-blue-400 text-sm px-3 py-1"
+                      >
+                        🏆 Completed
+                      </Badge>
+                    )}
                 </div>
+
+                {/* Badge Details Section */}
+                {badges[currentBadgeIndex].earned && (
+                  <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                    <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Badge Details
+                    </h5>
+                    <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                      <div>
+                        <span className="font-medium">Status:</span>{" "}
+                        {badges[currentBadgeIndex].isCompleted
+                          ? "Completed"
+                          : "Earned but not completed"}
+                      </div>
+                      {badges[currentBadgeIndex].uri && (
+                        <div>
+                          <span className="font-medium">Token URI:</span>{" "}
+                          <span className="break-all">
+                            {badges[currentBadgeIndex].uri}
+                          </span>
+                        </div>
+                      )}
+                      {badges[currentBadgeIndex].customUri && (
+                        <div>
+                          <span className="font-medium">Custom URI:</span>{" "}
+                          <span className="break-all">
+                            {badges[currentBadgeIndex].customUri}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* QR Code Section */}
@@ -353,27 +548,9 @@ export default function BadgeGallery() {
                 {/* Mint to Wallet Section */}
                 <div className="text-center mb-6">
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    Mint to Your Wallet
+                    Show this qrcode to shop owners/church
                   </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Collect this badge as an NFT in your connected wallet
-                  </p>
-                  
-                  {isConnected ? (
-                    <Button
-                      onClick={handleMintBadge}
-                      disabled={isPending || isConfirming}
-                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-                    >
-                      <Wallet className="w-4 h-4 mr-2" />
-                      {isPending ? "Preparing..." : isConfirming ? "Minting..." : "Mint Badge NFT"}
-                    </Button>
-                  ) : (
-                    <p className="text-sm text-orange-600 dark:text-orange-400">
-                      Connect your wallet to mint this badge
-                    </p>
-                  )}
-                  
+
                   {isSuccess && (
                     <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <p className="text-sm text-green-700 dark:text-green-400">
@@ -381,7 +558,7 @@ export default function BadgeGallery() {
                       </p>
                     </div>
                   )}
-                  
+
                   {error && (
                     <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                       <p className="text-sm text-red-700 dark:text-red-400">
@@ -420,7 +597,8 @@ export default function BadgeGallery() {
                     Shop owners can scan this code to verify your achievement
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500">
-                    Badge ID: {mockBadges[currentBadgeIndex].id} • Earned on Mar 15, 2024
+                    Badge ID: {badges[currentBadgeIndex].id} • Earned on Mar 15,
+                    2024
                   </p>
                 </div>
               </div>
@@ -431,7 +609,9 @@ export default function BadgeGallery() {
               <div className="flex gap-3">
                 {isSuccess && (
                   <Button
-                    onClick={() => window.open(`https://etherscan.io/tx/${hash}`, '_blank')}
+                    onClick={() =>
+                      window.open(`https://etherscan.io/tx/${hash}`, "_blank")
+                    }
                     variant="outline"
                     className="flex-1"
                   >
