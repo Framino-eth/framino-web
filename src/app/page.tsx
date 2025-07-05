@@ -11,9 +11,9 @@ import bgImage from "@/assets/bg.png";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-[#f2eee7] dark:bg-gray-900">
       {/* Navigation */}
-      <nav className="border-b bg-white/95 dark:bg-gray-900/95 backdrop-blur-md sticky top-0 z-50">
+      <nav className="border-b bg-[#f2eee7]/95 dark:bg-gray-900/95 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
@@ -65,7 +65,7 @@ export default function Home() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-20 bg-white dark:bg-gray-800">
+      <section className="py-20 bg-[#f2eee7] dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -77,7 +77,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
+            <Card className="border border-gray-300 shadow-sm bg-white dark:bg-gray-900">
               <CardHeader>
                 <Trophy className="h-12 w-12 text-gray-600 mb-4" />
                 <CardTitle>Earn Rewards</CardTitle>
@@ -88,7 +88,7 @@ export default function Home() {
               </CardHeader>
             </Card>
 
-            <Card className="border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
+            <Card className="border border-gray-300 shadow-sm bg-white dark:bg-gray-900">
               <CardHeader>
                 <Users className="h-12 w-12 text-gray-600 mb-4" />
                 <CardTitle>Join Community</CardTitle>
@@ -99,7 +99,7 @@ export default function Home() {
               </CardHeader>
             </Card>
 
-            <Card className="border border-gray-200 shadow-sm bg-white dark:bg-gray-900">
+            <Card className="border border-gray-300 shadow-sm bg-white dark:bg-gray-900">
               <CardHeader>
                 <MapPin className="h-12 w-12 text-gray-600 mb-4" />
                 <CardTitle>Verified Trails</CardTitle>
@@ -114,7 +114,7 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="pb-16 bg-white">
+      <section className="pb-16 bg-[#f2eee7] dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
@@ -157,14 +157,14 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#f2eee7] text-white py-6">
+      <footer className="bg-[#f2eee7] dark:bg-gray-800 text-gray-700 dark:text-white py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Mountain className="h-6 w-6" />
-              <span className="font-semibold">Framino</span>
+              <Mountain className="h-6 w-6 text-gray-700 dark:text-white" />
+              <span className="font-semibold text-gray-700 dark:text-white">Framino</span>
             </div>
-            <p className="text-gray-400">
+            <p className="text-gray-500 dark:text-gray-400">
               © 2025 Framino. All rights reserved.
             </p>
           </div>
