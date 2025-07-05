@@ -5,9 +5,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Mountain, MapPin, Wallet, Trophy, Users } from "lucide-react";
+import { Mountain, MapPin, Trophy, Users } from "lucide-react";
 import Link from "next/link";
+import bgImage from "@/assets/bg.png";
 
 export default function Home() {
   return (
@@ -37,22 +37,25 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 sm:py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden py-20 sm:py-56">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url(${bgImage.src})`,
+          }}
+        >
+          {/* Overlay for better text readability */}
+          <div className="absolute inset-0 bg-black/50 dark:bg-black/50"></div>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <Badge
-              variant="secondary"
-              className="mb-4 bg-gray-100 text-gray-700"
-            >
-              🚀 Web3 Hiking Platform
-            </Badge>
-            <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-gray-900 dark:text-white mb-6">
+            <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-white mb-6">
               Discover Trails,{" "}
-              <span className="text-gray-700 dark:text-gray-300">
-                Earn Rewards
-              </span>
+              <span className="text-gray-200">Earn Rewards</span>
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+            <p className="text-xl font-medium text-gray-200 max-w-3xl mx-auto mb-8">
               Join the world&apos;s first Web3 hiking community. Explore
               verified trails, complete challenges, and earn crypto rewards for
               your outdoor adventures.
@@ -111,17 +114,9 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16">
+      <section className="pb-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                1,200+
-              </div>
-              <div className="text-gray-600 dark:text-gray-300">
-                Verified Trails
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
               <div className="text-3xl font-bold text-gray-900 dark:text-white">
                 5,000+
@@ -149,27 +144,20 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gray-100 dark:bg-gray-800">
+      <section className="py-20 bg-[#f2eee7] pt-28">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
             Ready to Start Your Web3 Hiking Journey?
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+          <p className="text-xl text-gray-800 dark:text-gray-300 mb-8">
             Join thousands of hikers earning rewards for their outdoor
             adventures
           </p>
-          <Button
-            size="lg"
-            className="text-lg px-8 bg-gray-900 hover:bg-gray-800 text-white"
-          >
-            <Wallet className="h-5 w-5 mr-2" />
-            Connect Wallet & Start
-          </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-[#f2eee7] text-white py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">

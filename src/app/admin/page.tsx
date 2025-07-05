@@ -26,7 +26,7 @@ import {
   Zap,
   Heart,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
+// import { ThemeToggle } from "@/components/ThemeToggle";
 import { WalletConnectButton } from "@/components/WalletConnectButton";
 import { CameraScanner } from "@/components/CameraScannerNew";
 import { RedeemButton } from "@/components/RedeemButton";
@@ -285,7 +285,7 @@ export default function AdminPage() {
             </Link>
             <div className="flex items-center space-x-2">
               <WalletConnectButton />
-              <ThemeToggle />
+              {/* <ThemeToggle /> */}
             </div>
           </div>
         </div>

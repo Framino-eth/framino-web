@@ -13,7 +13,7 @@ import MapSection from "@/components/MapSection";
 import BadgeGallery from "@/components/BadgeGallery";
 import DonationForm from "@/components/DonationForm";
 import QRDonationScanner from "@/components/QRDonationScanner";
-import { ThemeToggle } from "@/components/ThemeToggle";
+// import { ThemeToggle } from "@/components/ThemeToggle";
 import { WalletConnectButton } from "@/components/WalletConnectButton";
 
 export default function HikerPage() {
@@ -40,7 +40,7 @@ export default function HikerPage() {
                 <span>Shop Admin</span>
               </Link>
               <WalletConnectButton />
-              <ThemeToggle />
+              {/* <ThemeToggle /> */}
             </div>
           </div>
         </div>
