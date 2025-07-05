@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import {
   Mountain,
   Plus,
   Minus,
@@ -19,6 +26,7 @@ import {
   Heart,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { CameraScanner } from "@/components/CameraScannerNew";
 
 // Mock shop items data
 const shopItems = [
@@ -142,6 +150,9 @@ interface CartItem {
 export default function AdminPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [checkoutDrawerOpen, setCheckoutDrawerOpen] = useState(false);
+  const [scannedBadgeId, setScannedBadgeId] = useState<string | null>(null);
+  const [checkoutStep, setCheckoutStep] = useState<"scan" | "confirm" | "complete">("scan");
 
   const categories = [
     "All",
@@ -205,11 +216,32 @@ export default function AdminPage() {
 
   const handleCheckout = () => {
     if (cart.length === 0) return;
+    
+    setCheckoutDrawerOpen(true);
+    setCheckoutStep("scan");
+    setScannedBadgeId(null);
+  };
 
-    // TODO: Implement checkout logic
-    alert(
-      `Checkout: ${getTotalItems()} items for $${getTotalPrice().toFixed(2)}`
-    );
+  const handleScanSuccess = (badgeId: string) => {
+    setScannedBadgeId(badgeId);
+    setCheckoutStep("confirm");
+  };
+
+  const handleConfirmCheckout = () => {
+    setCheckoutStep("complete");
+    // In a real app, this would process the transaction
+    setTimeout(() => {
+      setCheckoutDrawerOpen(false);
+      setCart([]);
+      setCheckoutStep("scan");
+      setScannedBadgeId(null);
+    }, 2000);
+  };
+
+  const handleCloseDrawer = () => {
+    setCheckoutDrawerOpen(false);
+    setCheckoutStep("scan");
+    setScannedBadgeId(null);
   };
 
   const clearCart = () => {
@@ -244,7 +276,7 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Shop Items Selection
+            Shop Items selection
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
             Select items for hikers to redeem with their badges
@@ -363,7 +395,7 @@ export default function AdminPage() {
             </div>
           )}
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-col lg:flex-row gap-3">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-400" />
@@ -381,7 +413,8 @@ export default function AdminPage() {
                 <Button
                   variant="outline"
                   onClick={clearCart}
-                  className="text-gray-600 border-gray-300"
+                  disabled={cart.length === 0}
+                  className="text-gray-600 border-gray-300 dark:text-gray-300 dark:border-gray-400 cursor-pointer"
                 >
                   Clear Cart
                 </Button>
@@ -389,19 +422,126 @@ export default function AdminPage() {
               <Button
                 onClick={handleCheckout}
                 disabled={cart.length === 0}
-                className={`px-8 py-2 font-semibold ${
+                className={` py-2 font-semibold cursor-pointer ${
                   cart.length === 0
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-green-600 hover:bg-green-700 text-white"
                 }`}
               >
-                <Heart className="h-4 w-4 mr-2" />
                 Redeem for Hiker
               </Button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Checkout Drawer */}
+      <Drawer open={checkoutDrawerOpen} onOpenChange={setCheckoutDrawerOpen}>
+        <DrawerContent className="max-h-[80vh]">
+          <DrawerHeader className="text-center">
+            <DrawerTitle>
+              {checkoutStep === "scan" && "Scan Hiker Badge"}
+              {checkoutStep === "confirm" && "Confirm Redemption"}
+              {checkoutStep === "complete" && "Redemption Complete"}
+            </DrawerTitle>
+            <DrawerDescription>
+              {checkoutStep === "scan" && "Scan the hiker's badge to verify their identity"}
+              {checkoutStep === "confirm" && "Review the items and confirm the redemption"}
+              {checkoutStep === "complete" && "Items have been successfully redeemed"}
+            </DrawerDescription>
+          </DrawerHeader>
+
+          <div className="px-6 pb-6">
+            {checkoutStep === "scan" && (
+              <CameraScanner
+                onScanSuccess={handleScanSuccess}
+                onClose={handleCloseDrawer}
+                isScanning={checkoutDrawerOpen}
+              />
+            )}
+
+            {checkoutStep === "confirm" && (
+              <div className="space-y-6">
+                {/* Badge Info */}
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <h4 className="font-medium text-green-800 dark:text-green-200">
+                    Hiker Badge Verified
+                  </h4>
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    Badge ID: {scannedBadgeId}
+                  </p>
+                </div>
+
+                {/* Order Summary */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900 dark:text-white">
+                    Redemption Summary
+                  </h4>
+                  {cart.map((item) => (
+                    <div key={item.id} className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        {item.quantity}x {item.name}
+                      </span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      Total: {getTotalItems()} items
+                    </span>
+                    <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                      ${getTotalPrice().toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCheckoutStep("scan")}
+                    className="flex-1"
+                  >
+                    Back to Scan
+                  </Button>
+                  <Button
+                    onClick={handleConfirmCheckout}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    Confirm Redemption
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {checkoutStep === "complete" && (
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto">
+                  <Heart className="h-8 w-8 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Redemption Successful!
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    The hiker can now collect their items
+                  </p>
+                </div>
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    {getTotalItems()} items redeemed for Badge {scannedBadgeId}
+                  </p>
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                    Total value: ${getTotalPrice().toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
