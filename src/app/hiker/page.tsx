@@ -107,16 +107,16 @@ const mockShops = [
 const mockBadges = [
   {
     id: 1,
-    name: "Spring Awakening",
+    name: "Donation #1",
     description: "Complete hiking challenges during spring season",
     rarity: "25 / 100",
-    earned: true,
+    earned: false,
     imageComplete: springComplete,
     imageIncomplete: spring,
   },
   {
     id: 2,
-    name: "Summer Explorer",
+    name: "Donation #2",
     description: "Conquer trails under the summer sun",
     rarity: "40 / 100", 
     earned: false,
@@ -125,16 +125,16 @@ const mockBadges = [
   },
   {
     id: 3,
-    name: "Autumn Wanderer",
+    name: "Donation #3",
     description: "Discover the beauty of fall hiking",
     rarity: "60 / 100",
-    earned: true,
+    earned: false,
     imageComplete: autumnComplete,
     imageIncomplete: autumn,
   },
   {
     id: 4,
-    name: "Winter Warrior",
+    name: "Donation #4",
     description: "Brave the cold on winter expeditions", 
     rarity: "15 / 100",
     earned: false,
@@ -331,7 +331,7 @@ export default function HikerPage() {
                   Badge Gallery
                 </CardTitle>
                 <CardDescription>
-                  Your hiking achievements and NFT badges
+                  Your hiking donation and USDC amounts
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -416,9 +416,9 @@ export default function HikerPage() {
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                       {mockBadges[currentBadgeIndex].name}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    {/* <p className="text-gray-600 dark:text-gray-400 mb-4">
                       {mockBadges[currentBadgeIndex].description}
-                    </p>
+                    </p> */}
                     <div className="flex items-center justify-center space-x-3">
                       <Badge 
                         variant="secondary" 
@@ -506,9 +506,9 @@ export default function HikerPage() {
 
               {/* Badge Info */}
               <div className="text-center mb-6">
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                {/* <p className="text-gray-600 dark:text-gray-400 mb-4">
                   {mockBadges[currentBadgeIndex].description}
-                </p>
+                </p> */}
                 <div className="flex items-center justify-center space-x-3 mb-4">
                   <Badge 
                     variant="secondary" 
