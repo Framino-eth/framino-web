@@ -70,7 +70,7 @@ export default function HikerPage() {
               }`}
             >
               <Award className="h-4 w-4 inline mr-1" />
-              Badge Gallery
+              Badges
             </button>
             {/* <button
               onClick={() => setActiveTab("donate")}

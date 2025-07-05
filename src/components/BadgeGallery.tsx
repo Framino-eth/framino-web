@@ -123,7 +123,7 @@ export default function BadgeGallery() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Trophy className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-200" />
-            Badge Gallery
+            Badges
           </CardTitle>
           <CardDescription>
             Your hiking donation and USDC amounts
