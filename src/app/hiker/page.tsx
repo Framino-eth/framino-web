@@ -12,6 +12,7 @@ import {
 import MapSection from "@/components/MapSection";
 import BadgeGallery from "@/components/BadgeGallery";
 import DonationForm from "@/components/DonationForm";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function HikerPage() {
   const [activeTab, setActiveTab] = useState<"map" | "badges" | "donate">("map");
@@ -35,10 +36,11 @@ export default function HikerPage() {
               >
                 Connected: 0x1234...5678
               </Badge>
+              {/* <ThemeToggle /> */}
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
               >
                 Profile
               </Button>
