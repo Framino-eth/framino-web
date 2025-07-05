@@ -16,7 +16,6 @@ export async function POST(req: NextRequest) {
 
     // Parse request body
     const body = await req.json();
-
     // Validate required fields
     const requiredFields = ['account', 'id', 'value', 'uri'];
     for (const field of requiredFields) {

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CameraScanner } from "@/components/CameraScannerNew";
 import { QrCode, Heart, CheckCircle, AlertCircle, Gift } from "lucide-react";
 import NumberFlow from "@number-flow/react";
-
+import { useAccount } from "wagmi";
 interface DonationInfo {
   organization: string;
   amount: number;
@@ -21,11 +21,11 @@ export default function QRDonationScanner() {
   const [isScanning, setIsScanning] = useState(false);
   const [donationInfo, setDonationInfo] = useState<DonationInfo | null>(null);
   const [processingDonation, setProcessingDonation] = useState(false);
-  const [customAmount, setCustomAmount] = useState<number>(20);
-  const [sliderValue, setSliderValue] = useState<number>(20);
-
+  const [customAmount, setCustomAmount] = useState<number>(5);
+  const [sliderValue, setSliderValue] = useState<number>(5);
+  const { address } = useAccount();
   // Slider settings
-  const minAmount = 1;
+  const minAmount = 0.01;
   const maxAmount = 10;
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,33 +71,51 @@ export default function QRDonationScanner() {
       //   await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Call the actual API endpoint
-      const response = await fetch("/api/framino/donate-usdc-with-paymaster", {
+      //   const response = await fetch("/api/framino/donate-usdc-with-paymaster", {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({
+      //       amount: customAmount.toString(),
+      //     }),
+      //   });
+
+      //   const data = await response.json();
+
+      //   if (!response.ok) {
+      //     throw new Error(data.error || "Donation failed");
+      //   }
+      //   // In a real app, this would process the blockchain transaction
+      //   console.log("Processing donation:", {
+      //     ...donationInfo,
+      //     amount: customAmount,
+      //   });
+      // okay since this is successful, we can then call second API  to mint the NFT
+      const mintResponse = await fetch("/api/framino/mint-with-paymaster", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: customAmount.toString(),
+          id: 1,
+          value: 1,
+          account: address,
+          uri: "https://bafybeihdkfn4ozw326n5fc543qvg5ttjbn6a3ru2xguoyndxhysrwh55oi.ipfs.dweb.link/", // Replace with actual NFT metadata URI
         }),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Donation failed");
+      const mintData = await mintResponse.json();
+      if (!mintResponse.ok) {
+        throw new Error(mintData.error || "NFT minting failed");
       }
-      // In a real app, this would process the blockchain transaction
-      console.log("Processing donation:", {
-        ...donationInfo,
-        amount: customAmount,
-      });
+      console.log("NFT minted successfully:", mintData);
 
       // Success - reset state
       setTimeout(() => {
         setDonationInfo(null);
         setProcessingDonation(false);
-        setCustomAmount(25);
-        setSliderValue(25);
+        setCustomAmount(5);
+        setSliderValue(5);
       }, 2000);
     } catch (error) {
       console.error("Donation failed:", error);
@@ -107,8 +125,8 @@ export default function QRDonationScanner() {
 
   const handleCancelDonation = () => {
     setDonationInfo(null);
-    setCustomAmount(25);
-    setSliderValue(25);
+    setCustomAmount(5);
+    setSliderValue(5);
   };
 
   return (
