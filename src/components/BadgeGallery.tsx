@@ -9,8 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Trophy,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Wallet,
+  ExternalLink
 } from "lucide-react";
+import { useAccount } from "wagmi";
+import { useMintBadge } from "@/hooks/useMintBadge";
 
 // Import seasonal badge images
 import springComplete from "@/assets/spring-complete.png";
@@ -65,6 +69,25 @@ const mockBadges = [
 export default function BadgeGallery() {
   const [currentBadgeIndex, setCurrentBadgeIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const { address, isConnected } = useAccount();
+  const { mintBadge, isPending, isConfirming, isSuccess, error, hash } = useMintBadge();
+
+  const handleMintBadge = async () => {
+    if (!address || !isConnected) {
+      alert("Please connect your wallet first");
+      return;
+    }
+
+    const currentBadge = mockBadges[currentBadgeIndex];
+    try {
+      // In a real app, you'd generate proper metadata URI
+      const metadataUri = `https://api.framino.com/metadata/${currentBadge.id}`;
+      await mintBadge(address, currentBadge.id, metadataUri);
+    } catch (err) {
+      console.error("Failed to mint badge:", err);
+    }
+  };
 
   const nextBadge = () => {
     setCurrentBadgeIndex((prev) => (prev + 1) % mockBadges.length);
@@ -327,6 +350,47 @@ export default function BadgeGallery() {
 
               {/* QR Code Section */}
               <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-gray-50 dark:bg-gray-900/50">
+                {/* Mint to Wallet Section */}
+                <div className="text-center mb-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    Mint to Your Wallet
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Collect this badge as an NFT in your connected wallet
+                  </p>
+                  
+                  {isConnected ? (
+                    <Button
+                      onClick={handleMintBadge}
+                      disabled={isPending || isConfirming}
+                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                    >
+                      <Wallet className="w-4 h-4 mr-2" />
+                      {isPending ? "Preparing..." : isConfirming ? "Minting..." : "Mint Badge NFT"}
+                    </Button>
+                  ) : (
+                    <p className="text-sm text-orange-600 dark:text-orange-400">
+                      Connect your wallet to mint this badge
+                    </p>
+                  )}
+                  
+                  {isSuccess && (
+                    <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <p className="text-sm text-green-700 dark:text-green-400">
+                        🎉 Badge minted successfully!
+                      </p>
+                    </div>
+                  )}
+                  
+                  {error && (
+                    <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                      <p className="text-sm text-red-700 dark:text-red-400">
+                        Failed to mint badge. Please try again.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
                 {/* QR Code Placeholder */}
                 <div className="flex justify-center mb-4">
                   <div className="w-48 h-48 bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center">
@@ -364,12 +428,24 @@ export default function BadgeGallery() {
 
             {/* Modal Footer */}
             <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-              <Button
-                onClick={() => setIsModalOpen(false)}
-                className="w-full bg-gray-900 hover:bg-gray-800 text-white"
-              >
-                Close
-              </Button>
+              <div className="flex gap-3">
+                {isSuccess && (
+                  <Button
+                    onClick={() => window.open(`https://etherscan.io/tx/${hash}`, '_blank')}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    View on Explorer
+                  </Button>
+                )}
+                <Button
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 bg-gray-900 hover:bg-gray-800 text-white"
+                >
+                  Close
+                </Button>
+              </div>
             </div>
           </motion.div>
         </div>

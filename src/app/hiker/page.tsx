@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
   Mountain,
   MapPin,
@@ -13,6 +11,7 @@ import MapSection from "@/components/MapSection";
 import BadgeGallery from "@/components/BadgeGallery";
 import DonationForm from "@/components/DonationForm";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { WalletConnectButton } from "@/components/WalletConnectButton";
 
 export default function HikerPage() {
   const [activeTab, setActiveTab] = useState<"map" | "badges" | "donate">("map");
@@ -30,20 +29,8 @@ export default function HikerPage() {
               </span>
             </div>
             <div className="flex items-center space-x-4">
-              <Badge
-                variant="outline"
-                className="text-gray-600 border-gray-300"
-              >
-                Connected: 0x1234...5678
-              </Badge>
+              <WalletConnectButton />
               {/* <ThemeToggle /> */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-              >
-                Profile
-              </Button>
             </div>
           </div>
         </div>

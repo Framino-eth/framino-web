@@ -4,6 +4,9 @@
 /* Mapbox GL JS CSS */
 @import "mapbox-gl/dist/mapbox-gl.css";
 
+/* RainbowKit CSS */
+@import "@rainbow-me/rainbowkit/styles.css";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
