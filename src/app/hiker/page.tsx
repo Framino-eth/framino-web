@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { 
   Mountain,
   MapPin,
   Award,
-  Heart
+  Heart,
+  Settings
 } from "lucide-react";
 import MapSection from "@/components/MapSection";
 import BadgeGallery from "@/components/BadgeGallery";
@@ -29,6 +31,13 @@ export default function HikerPage() {
               </span>
             </div>
             <div className="flex items-center space-x-4">
+              <Link 
+                href="/admin"
+                className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 flex items-center space-x-1 transition-colors"
+              >
+                <Settings className="h-4 w-4" />
+                <span>Shop Admin</span>
+              </Link>
               <WalletConnectButton />
               <ThemeToggle />
             </div>
