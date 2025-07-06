@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import Webcam from "react-webcam";
 import { BrowserMultiFormatReader } from "@zxing/library";
+import { useAccount } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { Camera, AlertCircle, QrCode, Heart, Gift, Award, Download, Image as ImageIcon } from "lucide-react";
 
@@ -29,9 +30,15 @@ export function CameraScanner({
   const [scannedImage, setScannedImage] = useState<string | null>(null);
   const [scanHistory, setScanHistory] = useState<Array<{id: string, data: string, image: string, timestamp: Date}>>([]);
   const codeReader = useRef(new BrowserMultiFormatReader());
+  
+  // Get connected wallet address
+  const { address, isConnected } = useAccount();
 
   // Mode-specific configuration
   const getModeConfig = () => {
+    // Use connected wallet address or fallback to mock address
+    const walletAddress = isConnected && address ? address : "0x1234...5678";
+    
     switch (mode) {
       case "hiker":
         return {
@@ -41,7 +48,7 @@ export function CameraScanner({
           successText: "Donation QR Found!",
           icon: Heart,
           color: "green",
-          mockData: "DONATION_TRAIL_001_$5_USDC"
+          mockData: `DONATION_TRAIL_001_$5_USDC_${walletAddress}`
         };
       case "shop":
         return {
@@ -53,7 +60,7 @@ export function CameraScanner({
           color: "blue",
           mockData: JSON.stringify({
             badgeId: 1,
-            walletAddress: "0x1234...5678",
+            walletAddress: walletAddress,
             balance: 5,
             type: "seasonal",
             status: "earned"
@@ -69,7 +76,7 @@ export function CameraScanner({
           color: "purple",
           mockData: JSON.stringify({
             badgeId: 2,
-            walletAddress: "0x1234...5678",
+            walletAddress: walletAddress,
             type: "seasonal",
             status: "earned"
           })
@@ -82,7 +89,7 @@ export function CameraScanner({
           successText: "QR Code Found!",
           icon: QrCode,
           color: "gray",
-          mockData: "GENERIC_QR_CODE"
+          mockData: `GENERIC_QR_CODE_${walletAddress}`
         };
     }
   };
@@ -393,6 +400,36 @@ export function CameraScanner({
 
   return (
     <div className="space-y-4">
+      {/* Wallet Connection Status */}
+      {/* <div className={`p-3 rounded-lg border ${
+        isConnected 
+          ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" 
+          : "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800"
+      }`}>
+        <div className="flex items-center space-x-2">
+          <div className={`w-2 h-2 rounded-full ${
+            isConnected ? "bg-green-500" : "bg-yellow-500"
+          }`}></div>
+          <span className={`text-sm font-medium ${
+            isConnected 
+              ? "text-green-800 dark:text-green-200" 
+              : "text-yellow-800 dark:text-yellow-200"
+          }`}>
+            {isConnected ? "Wallet Connected" : "Wallet Not Connected"}
+          </span>
+        </div>
+        {isConnected && address && (
+          <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+            Using address: {address.slice(0, 6)}...{address.slice(-4)}
+          </p>
+        )}
+        {!isConnected && (
+          <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+            Mock data will use placeholder address
+          </p>
+        )}
+      </div> */}
+
       <div className="flex items-center justify-between"></div>
 
       <div className="relative">

@@ -47,46 +47,40 @@ export function RedeemButton({
     setTxHash(null);
 
     try {
-      // Mock implementation - replace with actual blockchain call
-      console.log("Redeeming items for token:", tokenId);
+      console.log("Processing redemption for token:", tokenId);
       console.log("Total amount:", totalAmount);
       console.log("Cart items:", cartItems);
       console.log("Admin wallet:", address);
 
-      // Simulate blockchain transaction
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Call the redeem-with-paymaster API endpoint
+      const response = await fetch('/api/framino/redeem-with-paymaster', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user: address, // The admin wallet address who is processing the redemption
+          id: 1, // this will be hardcoded for now, but can be dynamic
+          amount: totalAmount, // Total redemption amount
+        }),
+      });
 
-      // Mock transaction hash
-        const mockTxHash = "0x" + Math.random().toString(16).substr(2, 64);
-        setTxHash(mockTxHash);
+      const result = await response.json();
 
-        console.log("Mock redemption successful! Tx:", mockTxHash);
-        onRedeemSuccess();
+      if (!response.ok) {
+        throw new Error(result.error || `HTTP error! status: ${response.status}`);
+      }
 
-      // Real implementation would look like this:
+      if (!result.success) {
+        throw new Error(result.error || 'Redemption failed');
+      }
 
-      //   if (!(window as any).ethereum) {
-      //     throw new Error("Please install MetaMask!");
-      //   }
+      // Extract transaction hash from the response
+      const transactionHash = result.data.txHash;
+      setTxHash(transactionHash);
 
-      //   const provider = new ethers.BrowserProvider((window as any).ethereum);
-      //   const signer = await provider.getSigner();
-
-      //   // You'll need to import your contract ABI
-      //   const contract = new ethers.Contract(
-      //     CONTRACT_ADDRESS,
-      //     FraminoNFTAbi,
-      //     signer
-      //   );
-
-      //   // Call your smart contract redeem function
-      //   const tx = await contract.redeem(
-      //     tokenId,
-      //     ethers.parseEther(totalAmount.toString())
-      //   );
-      //   await tx.wait();
-      //   setTxHash(tx.hash);
-      //   onRedeemSuccess();
+      console.log("Redemption successful! Transaction hash:", transactionHash);
+      onRedeemSuccess();
     } catch (error: unknown) {
       console.error("Redemption failed:", error);
       const errorMessage =
@@ -119,7 +113,7 @@ export function RedeemButton({
               size="sm"
               className="h-6 w-6 p-0"
               onClick={() =>
-                window.open(`https://polygonscan.com/tx/${txHash}`, "_blank")
+                window.open(`https://sepolia.arbiscan.io/tx/${txHash}`, "_blank")
               }
             >
               <ExternalLink className="h-3 w-3" />

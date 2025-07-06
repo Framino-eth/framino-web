@@ -279,13 +279,16 @@ export function CameraScannerMultiMode({
   };
 
   const getMockDataForMode = () => {
+    // Use connected wallet address or fallback to mock address
+    const walletAddress = address || "0x1234...5678";
+    
     switch (mode) {
       case "hiker":
-        return "DONATION_TRAIL_001_$5_USDC";
+        return `DONATION_TRAIL_001_$5_USDC_${walletAddress}`;
       case "shop":
         return JSON.stringify({
           badgeId: 1,
-          walletAddress: "0x1234...5678",
+          walletAddress: walletAddress,
           balance: 5,
           type: "seasonal",
           status: "earned"
@@ -293,12 +296,12 @@ export function CameraScannerMultiMode({
       case "church":
         return JSON.stringify({
           badgeId: 2,
-          walletAddress: "0x1234...5678",
+          walletAddress: walletAddress,
           type: "seasonal",
           status: "earned"
         });
       default:
-        return "GENERIC_QR_CODE";
+        return `GENERIC_QR_CODE_${walletAddress}`;
     }
   };
 
@@ -352,6 +355,36 @@ export function CameraScannerMultiMode({
         <Button variant="ghost" size="sm" onClick={onClose}>
           <X className="h-4 w-4" />
         </Button>
+      </div>
+
+      {/* Wallet Connection Status */}
+      <div className={`p-3 rounded-lg border ${
+        address 
+          ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" 
+          : "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800"
+      }`}>
+        <div className="flex items-center space-x-2">
+          <div className={`w-2 h-2 rounded-full ${
+            address ? "bg-green-500" : "bg-yellow-500"
+          }`}></div>
+          <span className={`text-sm font-medium ${
+            address 
+              ? "text-green-800 dark:text-green-200" 
+              : "text-yellow-800 dark:text-yellow-200"
+          }`}>
+            {address ? "Wallet Connected" : "Wallet Not Connected"}
+          </span>
+        </div>
+        {address && (
+          <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+            Using address: {address.slice(0, 6)}...{address.slice(-4)}
+          </p>
+        )}
+        {!address && (
+          <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+            Mock data will use placeholder address
+          </p>
+        )}
       </div>
 
       <div className="relative">

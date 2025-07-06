@@ -6,7 +6,6 @@ import {
   NftRedeemRequest,
 } from "../models/framinoModel";
 import { ethers } from "ethers";
-import "dotenv/config";
 import {
   erc20Abi,
   encodePacked,

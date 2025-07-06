@@ -97,7 +97,7 @@ export default function BadgeGallery() {
 
   const contractAddress =
     process.env.NEXT_PUBLIC_FRAMINO_NFT_CONTRACT_ADDRESS ||
-    "0x73050b11f0Dd5C48Ed1C05c56236F0D235ba4f57";
+    "0x47c99c6D4c46e7E2a4eE74Db1D0C9be71d799a72";
 
   // Optimized fetch function - get balances first, then details for owned badges only
   const fetchUserNFTs = useCallback(
