@@ -18,9 +18,16 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // Validate required fields
+    if (!body.user) {
+      return NextResponse.json(
+        { error: 'Missing required field: user' },
+        { status: 400 }
+      );
+    }
+
     if (!body.id) {
       return NextResponse.json(
-        { error: 'Missing required field: tokenId' },
+        { error: 'Missing required field: id' },
         { status: 400 }
       );
     }
@@ -32,17 +39,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!body.userPrivateKey) {
-      return NextResponse.json(
-        { error: 'Missing required field: redeemer' },
-        { status: 400 }
-      );
-    }
-
     const requestBody: NftRedeemRequest = {
-      id: body.tokenId,
+      user: body.user,
+      id: body.id,
       amount: body.amount,
-      userPrivateKey: body.userPrivateKey, // Assuming this is for demo purposes; in production use wallet signature flow
     };
 
     // Validate amount (should be positive number)
@@ -56,16 +56,16 @@ export async function POST(req: NextRequest) {
 
     // Initialize service and process redemption
     const framinoService = new FraminoService();
-    const result = await framinoService.redeemWithPaymasterService(requestBody);
+    const result = await framinoService.redeemNftWithPaymasterService(requestBody);
 
     return NextResponse.json({
       success: true,
       data: result,
       message: 'NFT redemption completed successfully',
       redemptionDetails: {
+        user: requestBody.user,
         id: requestBody.id,
-        amount: requestBody.amount,
-        userPrivateKey: requestBody.userPrivateKey
+        amount: requestBody.amount
       }
     });
 

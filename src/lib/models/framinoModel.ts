@@ -22,9 +22,9 @@ export interface NftMarkCompletedRequest {
 }
 
 export interface NftRedeemRequest {
-  id: number;             // tokenId
-  amount: number;         // amount to redeem
-  userPrivateKey: string; // user's private key (for demo; in production use wallet signature flow)
+  user: string;   // Address of the NFT holder (walker)
+  id: number;     // NFT tokenId
+  amount: number; // Amount to redeem
 }
 
 // API Response types
