@@ -172,6 +172,7 @@ export default function ChurchPage() {
                 onScanSuccess={handleScanSuccess}
                 onClose={handleCloseDrawer}
                 isScanning={scannerDrawerOpen}
+                mode="church"
               />
             )}
 

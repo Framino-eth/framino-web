@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import Webcam from "react-webcam";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import { Button } from "@/components/ui/button";
-import { Camera, AlertCircle, QrCode, Heart, Gift, Award } from "lucide-react";
+import { Camera, AlertCircle, QrCode, Heart, Gift, Award, Download, Image as ImageIcon } from "lucide-react";
 
 export type ScannerMode = "hiker" | "shop" | "church";
 
@@ -24,6 +24,10 @@ export function CameraScanner({
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [permissionStatus, setPermissionStatus] = useState<string>('unknown');
+  const [scannedImage, setScannedImage] = useState<string | null>(null);
+  const [scanHistory, setScanHistory] = useState<Array<{id: string, data: string, image: string, timestamp: Date}>>([]);
   const codeReader = useRef(new BrowserMultiFormatReader());
 
   // Mode-specific configuration
@@ -85,6 +89,89 @@ export function CameraScanner({
 
   const config = getModeConfig();
 
+  // Check camera permissions and availability
+  useEffect(() => {
+    const checkCameraPermissions = async () => {
+      try {
+        console.log('🔍 Checking camera permissions...');
+        
+        // Check if navigator.mediaDevices is available
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          console.error('❌ Camera API not supported in this browser');
+          setError('Camera not supported in this browser');
+          setPermissionStatus('not-supported');
+          return;
+        }
+
+        // Check permission status
+        if (navigator.permissions) {
+          const permission = await navigator.permissions.query({ name: 'camera' as PermissionName });
+          console.log('🔐 Camera permission status:', permission.state);
+          setPermissionStatus(permission.state);
+          
+          if (permission.state === 'denied') {
+            setError('Camera access denied. Please enable camera permissions in your browser settings.');
+            return;
+          }
+        }
+
+        // Test camera access
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+              facingMode: "environment",
+              width: { ideal: 400 },
+              height: { ideal: 400 }
+            } 
+          });
+          console.log('✅ Camera access granted');
+          setCameraReady(true);
+          setPermissionStatus('granted');
+          // Stop the test stream
+          stream.getTracks().forEach(track => track.stop());
+        } catch (cameraError) {
+          console.error('❌ Camera access failed:', cameraError);
+          if (cameraError instanceof Error) {
+            if (cameraError.name === 'NotAllowedError') {
+              setError('Camera access denied. Please allow camera access and refresh the page.');
+            } else if (cameraError.name === 'NotFoundError') {
+              setError('No camera found. Please connect a camera and refresh the page.');
+            } else if (cameraError.name === 'NotReadableError') {
+              setError('Camera is being used by another application. Please close other camera apps.');
+            } else {
+              setError(`Camera error: ${cameraError.message}`);
+            }
+          } else {
+            setError('Unknown camera error occurred.');
+          }
+          setPermissionStatus('denied');
+        }
+      } catch (err) {
+        console.error('❌ Permission check failed:', err);
+        setError('Failed to check camera permissions');
+        setPermissionStatus('error');
+      }
+    };
+
+    checkCameraPermissions();
+  }, []);
+
+  // Function to download the scanned image
+  const downloadImage = useCallback((imageDataUrl: string, qrData: string) => {
+    try {
+      const link = document.createElement('a');
+      link.download = `qr-scan-${mode}-${Date.now()}.jpg`;
+      link.href = imageDataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      console.log('💾 Image saved:', link.download);
+      console.log('📸 QR Data in image:', qrData);
+    } catch (err) {
+      console.error('❌ Failed to download image:', err);
+    }
+  }, [mode]);
+
   // Real QR code scanning using ZXing library
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -96,7 +183,7 @@ export function CameraScanner({
         if (webcamRef.current) {
           const imageSrc = webcamRef.current.getScreenshot();
           if (imageSrc) {
-            console.log('📸 Taking screenshot for QR analysis...');
+            // console.log('📸 Taking screenshot for QR analysis...');
             try {
               const img = new Image();
               img.onload = async () => {
@@ -107,7 +194,7 @@ export function CameraScanner({
                     canvas.width = img.width;
                     canvas.height = img.height;
                     ctx.drawImage(img, 0, 0);
-                    console.log(`🖼️ Created canvas: ${canvas.width}x${canvas.height}`);
+                    // console.log(`🖼️ Created canvas: ${canvas.width}x${canvas.height}`);
                     
                     // Convert canvas to blob and decode
                     canvas.toBlob(async (blob) => {
@@ -124,6 +211,22 @@ export function CameraScanner({
                             console.log('🎯 Mode:', mode);
                             console.log('📊 Result object:', result);
                             
+                            // Save the image when QR is found
+                            const imageDataUrl = imageSrc;
+                            setScannedImage(imageDataUrl);
+                            
+                            // Add to scan history
+                            const scanEntry = {
+                              id: Date.now().toString(),
+                              data: qrData,
+                              image: imageDataUrl,
+                              timestamp: new Date()
+                            };
+                            setScanHistory(prev => [scanEntry, ...prev.slice(0, 4)]); // Keep last 5 scans
+                            
+                            // Auto-download the image
+                            downloadImage(imageDataUrl, qrData);
+                            
                             setScanResult(qrData);
                             setScanning(false);
                             setError(null);
@@ -132,9 +235,9 @@ export function CameraScanner({
                         } catch (decodeError) {
                           // More detailed error logging for debugging
                           if (decodeError instanceof Error) {
-                            console.log('❌ QR decode failed:', decodeError.message);
+                            // console.log('❌ QR decode failed:', decodeError.message);
                           } else {
-                            console.log('⚠️ No QR code found in this frame');
+                            // console.log('⚠️ No QR code found in this frame');
                           }
                         }
                       }
@@ -155,7 +258,7 @@ export function CameraScanner({
         } else {
           console.log('📹 Webcam ref not available');
         }
-      }, 1000); // Scan every second
+      }, 3000); // Scan every second
     } else {
       console.log('⏹️ Scanner stopped or not active');
     }
@@ -165,11 +268,19 @@ export function CameraScanner({
         clearInterval(intervalId);
       }
     };
-  }, [isScanning, scanning, onScanSuccess, mode]);
+  }, [isScanning, scanning, onScanSuccess, mode, downloadImage]);
 
   const startScanning = () => {
     console.log('🚀 START SCANNING BUTTON CLICKED');
     console.log('🎯 Mode:', mode);
+    console.log('📹 Camera ready:', cameraReady);
+    console.log('🔐 Permission status:', permissionStatus);
+    
+    if (!cameraReady) {
+      setError('Camera not ready. Please check permissions and refresh the page.');
+      return;
+    }
+    
     setScanning(true);
     setError(null);
     setScanResult(null);
@@ -178,6 +289,38 @@ export function CameraScanner({
   const stopScanning = () => {
     console.log('🛑 STOP SCANNING BUTTON CLICKED');
     setScanning(false);
+  };
+
+  // Webcam event handlers
+  const handleWebcamReady = () => {
+    console.log('📹 Webcam is ready and streaming');
+    setCameraReady(true);
+    setError(null);
+  };
+
+  const handleWebcamError = (error: string | DOMException) => {
+    console.error('📹 Webcam error:', error);
+    setCameraReady(false);
+    
+    if (typeof error === 'string') {
+      setError(`Webcam error: ${error}`);
+    } else if (error instanceof DOMException) {
+      switch (error.name) {
+        case 'NotAllowedError':
+          setError('Camera access denied. Please allow camera access in your browser.');
+          break;
+        case 'NotFoundError':
+          setError('No camera found. Please connect a camera.');
+          break;
+        case 'NotReadableError':
+          setError('Camera is busy. Please close other camera applications.');
+          break;
+        default:
+          setError(`Camera error: ${error.message}`);
+      }
+    } else {
+      setError('Unknown webcam error occurred.');
+    }
   };
 
   // Mock scan for demo purposes - uses mode-specific mock data
@@ -192,6 +335,19 @@ export function CameraScanner({
     onScanSuccess(config.mockData);
     
     console.log('✅ Demo scan completed successfully');
+  };
+
+  // Manual save function for the current scanned image
+  const saveCurrentImage = () => {
+    if (scannedImage && scanResult) {
+      downloadImage(scannedImage, scanResult);
+    }
+  };
+
+  // Clear scan history
+  const clearScanHistory = () => {
+    setScanHistory([]);
+    console.log('🗑️ Scan history cleared');
   };
 
   const getColorClasses = (color: string) => {
@@ -252,7 +408,19 @@ export function CameraScanner({
               facingMode: "environment", // Use back camera on mobile
             }}
             className="w-full h-full object-cover"
+            onUserMedia={handleWebcamReady}
+            onUserMediaError={handleWebcamError}
           />
+
+          {/* Camera status indicator */}
+          {!cameraReady && !error && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center text-white bg-black/70 p-4 rounded-lg">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                <p className="text-sm">Initializing camera...</p>
+              </div>
+            </div>
+          )}
 
           {/* Scanning overlay */}
           {scanning && (
@@ -286,15 +454,48 @@ export function CameraScanner({
       {/* Scan Result */}
       {scanResult && (
         <div className={`p-4 ${colors.bg} rounded-lg border ${colors.borderColor}`}>
-          <div className="flex items-center space-x-2">
-            <IconComponent className={`h-5 w-5 ${colors.icon}`} />
-            <span className={`text-sm font-medium ${colors.text}`}>
-              {config.successText}
-            </span>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2">
+              <IconComponent className={`h-5 w-5 ${colors.icon}`} />
+              <span className={`text-sm font-medium ${colors.text}`}>
+                {config.successText}
+              </span>
+            </div>
+            {scannedImage && (
+              <Button
+                onClick={saveCurrentImage}
+                variant="outline"
+                size="sm"
+                className="h-8 px-2"
+              >
+                <Download className="h-4 w-4 mr-1" />
+                Save
+              </Button>
+            )}
           </div>
-          <p className={`text-xs ${colors.text} mt-1 opacity-75`}>
-            QR Data: {scanResult.length > 50 ? `${scanResult.substring(0, 50)}...` : scanResult}
-          </p>
+          
+          <div className="space-y-3">
+            <p className={`text-xs ${colors.text} opacity-75`}>
+              QR Data: {scanResult.length > 50 ? `${scanResult.substring(0, 50)}...` : scanResult}
+            </p>
+            
+            {/* Show the scanned image */}
+            {scannedImage && (
+              <div className="border rounded-lg p-2 bg-white dark:bg-gray-800">
+                <div className="flex items-center space-x-2 mb-2">
+                  <ImageIcon className="h-4 w-4 text-gray-500" />
+                  <span className="text-xs text-gray-500">Scanned Image:</span>
+                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={scannedImage} 
+                  alt="Scanned QR Code" 
+                  className="w-full max-w-xs mx-auto rounded border"
+                  style={{ maxHeight: '200px', objectFit: 'contain' }}
+                />
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -317,9 +518,10 @@ export function CameraScanner({
             <Button
               onClick={startScanning}
               className={`${colors.button} text-white`}
+              disabled={!cameraReady}
             >
               <Camera className="h-4 w-4 mr-2" />
-              Start Scanning
+              {cameraReady ? 'Start Scanning' : 'Camera Loading...'}
             </Button>
             <Button onClick={mockScan} variant="outline" className="text-sm">
               Demo Scan
@@ -331,6 +533,65 @@ export function CameraScanner({
           </Button>
         )}
       </div>
+
+      {/* Camera Status Info */}
+      {permissionStatus !== 'unknown' && (
+        <div className="text-center">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Camera: {permissionStatus} | Ready: {cameraReady ? 'Yes' : 'No'}
+          </p>
+        </div>
+      )}
+
+      {/* Scan History */}
+      {scanHistory.length > 0 && (
+        <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white flex items-center">
+              <ImageIcon className="h-4 w-4 mr-2" />
+              Recent Scans ({scanHistory.length})
+            </h3>
+            <Button
+              onClick={clearScanHistory}
+              variant="ghost"
+              size="sm"
+              className="text-xs h-6 px-2"
+            >
+              Clear
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {scanHistory.slice(0, 3).map((scan) => (
+              <div key={scan.id} className="flex items-center space-x-3 p-2 bg-white dark:bg-gray-700 rounded border">
+                <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src={scan.image} 
+                    alt="Scan thumbnail" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-600 dark:text-gray-300 truncate">
+                    {scan.data.length > 30 ? `${scan.data.substring(0, 30)}...` : scan.data}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {scan.timestamp.toLocaleTimeString()}
+                  </p>
+                </div>
+                <Button
+                  onClick={() => downloadImage(scan.image, scan.data)}
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
