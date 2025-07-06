@@ -1,5 +1,9 @@
 # Framino - Web3 Hiking Platform 🏔️
 
+<p align="center">
+  <img width="350" alt="Frame 3" src="https://github.com/user-attachments/assets/398d740a-e944-46fb-9991-1d5aebf13b8b" />
+</p>
+
 > A revolutionary platform that combines outdoor hiking adventures with blockchain technology, rewarding hikers with crypto tokens for their trail completions and enabling a decentralized hiking ecosystem.
 
 ## 🌟 Overview
