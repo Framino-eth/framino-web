@@ -36,7 +36,7 @@ const shopItems = [
   {
     id: 1,
     name: "Water Bottle",
-    price: 2.5,
+    price: 3,
     category: "Beverages",
     icon: Droplets,
     description: "Refreshing spring water",
@@ -45,7 +45,7 @@ const shopItems = [
   {
     id: 2,
     name: "Latte",
-    price: 4.75,
+    price: 5,
     category: "Beverages",
     icon: Coffee,
     description: "Fresh brewed coffee latte",
@@ -54,7 +54,7 @@ const shopItems = [
   {
     id: 3,
     name: "Fresh Apple",
-    price: 1.25,
+    price: 1,
     category: "Fruits",
     icon: Apple,
     description: "Organic red apple",
@@ -63,7 +63,7 @@ const shopItems = [
   {
     id: 4,
     name: "Trail Mix Cookies",
-    price: 3.0,
+    price: 3,
     category: "Snacks",
     icon: Cookie,
     description: "Homemade energy cookies",
@@ -72,7 +72,7 @@ const shopItems = [
   {
     id: 5,
     name: "Energy Bar",
-    price: 2.25,
+    price: 2,
     category: "Snacks",
     icon: Zap,
     description: "High protein energy bar",
@@ -81,7 +81,7 @@ const shopItems = [
   {
     id: 6,
     name: "Trail Sandwich",
-    price: 6.5,
+    price: 7,
     category: "Food",
     icon: Sandwich,
     description: "Turkey and avocado sandwich",
@@ -90,7 +90,7 @@ const shopItems = [
   {
     id: 7,
     name: "Orange",
-    price: 1.5,
+    price: 2,
     category: "Fruits",
     icon: Apple,
     description: "Fresh orange",
@@ -99,7 +99,7 @@ const shopItems = [
   {
     id: 8,
     name: "Banana",
-    price: 1.0,
+    price: 1,
     category: "Fruits",
     icon: Apple,
     description: "Ripe banana",
@@ -108,7 +108,7 @@ const shopItems = [
   {
     id: 9,
     name: "Ice Cream",
-    price: 4.0,
+    price: 4,
     category: "Desserts",
     icon: IceCream,
     description: "Vanilla ice cream",
@@ -117,7 +117,7 @@ const shopItems = [
   {
     id: 10,
     name: "Sports Drink",
-    price: 3.25,
+    price: 3,
     category: "Beverages",
     icon: Droplets,
     description: "Electrolyte sports drink",
@@ -126,7 +126,7 @@ const shopItems = [
   {
     id: 11,
     name: "Granola Bar",
-    price: 2.75,
+    price: 3,
     category: "Snacks",
     icon: Zap,
     description: "Oats and honey granola",
@@ -135,7 +135,7 @@ const shopItems = [
   {
     id: 12,
     name: "Hot Chocolate",
-    price: 3.5,
+    price: 4,
     category: "Beverages",
     icon: Coffee,
     description: "Rich hot chocolate",
@@ -351,7 +351,7 @@ export default function AdminPage() {
 
                   <div className="flex items-center justify-between">
                     <div className="text-lg font-bold text-gray-600 dark:text-gray-400">
-                      ${item.price.toFixed(2)}
+                      ${item.price}
                     </div>
 
                     <div className="flex items-center space-x-2">
@@ -406,7 +406,7 @@ export default function AdminPage() {
                   >
                     {item.quantity}x {item.name}
                     <span className="ml-1 text-green-600 dark:text-green-400 font-medium">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      ${(item.price * item.quantity)}
                     </span>
                   </span>
                 ))}
@@ -423,7 +423,7 @@ export default function AdminPage() {
                 </span>
               </div>
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                ${getTotalPrice().toFixed(2)}
+                ${getTotalPrice()}
               </div>
             </div>
 
@@ -512,7 +512,7 @@ export default function AdminPage() {
                         {item.quantity}x {item.name}
                       </span>
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ${(item.price * item.quantity)}
                       </span>
                     </div>
                   ))}
@@ -521,7 +521,7 @@ export default function AdminPage() {
                       Total: {getTotalItems()} items
                     </span>
                     <span className="text-lg font-bold text-green-600 dark:text-green-400">
-                      ${getTotalPrice().toFixed(2)}
+                      ${getTotalPrice()}
                     </span>
                   </div>
                 </div>
