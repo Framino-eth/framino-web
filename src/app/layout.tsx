@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Framino - Web3 Hiking Platform",
   description:
-    "Discover trails, earn rewards, and connect with the hiking community",
+    "Framino - Web3 Hiking Platform",
 };
 
 export default function RootLayout({

@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
-  Mountain, 
   Wallet, 
   Trophy, 
   MapPin, 
@@ -24,6 +23,7 @@ import { readContracts } from "@wagmi/core";
 import { config } from "@/lib/wagmi";
 import FraminoNFTABI from "@/lib/abi/FraminoNFT.json";
 import { Abi } from "viem";
+import logoImage from "@/assets/logo.png";
 
 interface NFTData {
   tokenId: number;
@@ -179,7 +179,7 @@ export default function HikerDataPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-              <Mountain className="h-8 w-8 text-gray-700 dark:text-gray-300" />
+              <img src={logoImage.src} className="h-10 w-10 "></img>
               <div>
                 <span className="text-xl font-bold text-gray-900 dark:text-white">
                   Framino

@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Mountain, MapPin, Award, QrCode } from "lucide-react";
+import { MapPin, Award, QrCode } from "lucide-react";
 import MapSection from "@/components/MapSection";
 import BadgeGallery from "@/components/BadgeGallery";
 import QRDonationScanner from "@/components/QRDonationScanner";
 // import { ThemeToggle } from "@/components/ThemeToggle";
 import { WalletConnectButton } from "@/components/WalletConnectButton";
+import logoImage from "@/assets/logo.png";
 
 export default function HikerPage() {
   const [activeTab, setActiveTab] = useState<
@@ -24,7 +25,7 @@ export default function HikerPage() {
               href="/"
               className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
             >
-              <Mountain className="h-8 w-8 text-gray-700 dark:text-gray-300" />
+              <img src={logoImage.src} className="h-10 w-10 "></img>
               <span className="text-xl font-bold text-gray-900 dark:text-white">
                 Framino
               </span>

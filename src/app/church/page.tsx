@@ -11,10 +11,11 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Mountain, QrCode, CheckCircle } from "lucide-react";
+import { QrCode, CheckCircle } from "lucide-react";
 import { WalletConnectButton } from "@/components/WalletConnectButton";
 import { CameraScanner } from "@/components/CameraScannerNew";
 import { useAccount } from "wagmi";
+import logoImage from "@/assets/logo.png";
 
 export default function ChurchPage() {
   const { address, isConnected } = useAccount();
@@ -93,7 +94,8 @@ export default function ChurchPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-              <Mountain className="h-8 w-8 text-gray-700 dark:text-gray-300" />
+            
+              <img src={logoImage.src} className="h-10 w-10 "></img>
               <div>
                 <span className="text-xl font-bold text-gray-900 dark:text-white">
                   Framino

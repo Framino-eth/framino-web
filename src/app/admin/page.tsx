@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import logoImage from "@/assets/logo.png";
 import {
   Drawer,
   DrawerContent,
@@ -13,7 +14,6 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import {
-  Mountain,
   Plus,
   Minus,
   ShoppingCart,
@@ -273,7 +273,7 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-              <Mountain className="h-8 w-8 text-gray-700 dark:text-gray-300" />
+              <img src={logoImage.src} className="h-10 w-10 "></img>
               <div>
                 <span className="text-xl font-bold text-gray-900 dark:text-white">
                   Framino
