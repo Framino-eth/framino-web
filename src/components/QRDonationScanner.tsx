@@ -71,26 +71,26 @@ export default function QRDonationScanner() {
       //   await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Call the actual API endpoint
-      //   const response = await fetch("/api/framino/donate-usdc-with-paymaster", {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify({
-      //       amount: customAmount.toString(),
-      //     }),
-      //   });
+      const response = await fetch("/api/framino/donate-usdc-with-paymaster", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: customAmount.toString(),
+        }),
+      });
 
-      //   const data = await response.json();
+      const data = await response.json();
 
-      //   if (!response.ok) {
-      //     throw new Error(data.error || "Donation failed");
-      //   }
-      //   // In a real app, this would process the blockchain transaction
-      //   console.log("Processing donation:", {
-      //     ...donationInfo,
-      //     amount: customAmount,
-      //   });
+      if (!response.ok) {
+        throw new Error(data.error || "Donation failed");
+      }
+      // In a real app, this would process the blockchain transaction
+      console.log("Processing donation:", {
+        ...donationInfo,
+        amount: customAmount,
+      });
       // okay since this is successful, we can then call second API  to mint the NFT
       const mintResponse = await fetch("/api/framino/mint-with-paymaster", {
         method: "POST",
@@ -99,7 +99,7 @@ export default function QRDonationScanner() {
         },
         body: JSON.stringify({
           id: 1,
-          value: customAmount ,
+          value: customAmount,
           account: address,
           uri: "https://bafybeihdkfn4ozw326n5fc543qvg5ttjbn6a3ru2xguoyndxhysrwh55oi.ipfs.dweb.link/", // Replace with actual NFT metadata URI
         }),
